@@ -161,6 +161,7 @@ class SONG:
         is_execute = False
         ephoc = 0
         while not is_execute:
+            print("epoch: {}".format(ephoc))
             for idx in np.random.permutation(self.n_in_data_num):
                 self.idx = idx
                 x = self.X[idx]
@@ -183,6 +184,15 @@ class SONG:
             ephoc += 1
             if ephoc >= self.n_max_epoch:
                 is_execute = True
+
+        if self.X_label is not None:
+            embedding_label = np.zeros(len(self.embeddings))
+            for i, x in enumerate(self.X):
+                self._update_neighbors(x)
+                i_1 = self.neighbor_idxs[0]
+                embedding_label[i_1] = self.X_label[i]
+            self.embedding_label = embedding_label
+        print("finished")
 
     def transform(self, x: np.array) -> np.array:
         """Fit X into an embedded space and return that transformed
