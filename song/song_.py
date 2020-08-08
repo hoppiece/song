@@ -77,7 +77,7 @@ class SONG:
         i_1 = self.neighbor_idxs[0]
         for j in list(self.topology[i_1].keys()):
             self.topology[i_1][j] *= self.edge_decay_rate  # Decay edges
-            self.topology[j][i_1] *= self.topology[i_1][j]
+            self.topology[j][i_1] = self.topology[i_1][j]
             if self.topology[i_1][j] < self.min_edge_weight:
                 del self.topology[i_1][j]  # Prune edges
                 del self.topology[j][i_1]
