@@ -75,13 +75,13 @@ class SONG:
         In this implementation, the graph always keep symmetric.
         """
         i_1 = self.neighbor_idxs[0]
-        for j in self.topology[i_1].keys():
+        for j in list(self.topology[i_1].keys()):
             self.topology[i_1][j] *= self.edge_decay_rate  # Decay edges
             self.topology[j][i_1] *= self.topology[i_1][j]
             if self.topology[i_1][j] < self.min_edge_weight:
                 del self.topology[i_1][j]  # Prune edges
                 del self.topology[j][i_1]
-        for j in self.neighbor_idxs[: self.n_neighbors]:
+        for j in self.neighbor_idxs[1 : self.n_neighbors]:
             self.topology[i_1][j] = 1.0  # Renew edges
             self.topology[j][i_1] = self.topology[i_1][j]
 
@@ -107,13 +107,12 @@ class SONG:
             dire = self.embeddings[i_1] - self.embeddings[j]
             dist = np.linalg.norm(dire)
             e = self.topology[i_1][j]
-            # nabla = 2 * a * b * e * dist ** (2 * b - 2) / (1 + dist ** (2 * b))
-            # TODO above derivative value occurs zero division warning,
-            # so some modification will be needed.
-            nabla = 0.001
+            nabla = (2 * a * b * e * dist ** (2 * b - 2)) / (1 + dist ** (2 * b))
             self.embeddings[j] += self.alpha * nabla * dire
 
         for j in np.random.permutation(list(negative_edges))[:n_negative_sample]:
+            if j == i_1:
+                continue
             dire = self.embeddings[i_1] - self.embeddings[j]
             dist = np.linalg.norm(dire)
             nabla = 2 * b / (dist ** 2 * (1 + dist ** (2 * b)))
@@ -140,7 +139,7 @@ class SONG:
 
         self.n_coding_vector += 1
 
-    def fit(self, X: np.array) -> None:
+    def fit(self, X: np.array, X_label=None) -> None:
         """Fit X in t an embedded space.
 
             Parameters
@@ -149,6 +148,7 @@ class SONG:
             """
 
         self.X = X
+        self.X_label = X_label
         self.n_in_data_num = X.shape[0]
         self.n_in_dim = X.shape[1]
         self.n_coding_vector = self.n_out_dim + 1
@@ -161,13 +161,15 @@ class SONG:
         is_execute = False
         ephoc = 0
         while not is_execute:
-            for x in np.random.permutation(X):
+            for idx in np.random.permutation(self.n_in_data_num):
+                self.idx = idx
+                x = self.X[idx]
                 self._update_neighbors(x)
                 i_1 = self.neighbor_idxs[0]
                 old_connecteds = set(self.topology[i_1].keys())
                 self._edge_curation()
-                connecteds = self.topology[i_1].keys()
-                if old_connecteds == connecteds:
+                connecteds = set(self.topology[i_1].keys())
+                if old_connecteds == connecteds and ephoc > 0:
                     is_execute = True
                     break
 
@@ -182,23 +184,28 @@ class SONG:
             if ephoc >= self.n_max_epoch:
                 is_execute = True
 
-    def transform(self, X: np.array):
-        """Fit X int an embedded space and return that transformed
+    def transform(self, x: np.array) -> np.array:
+        """Fit X into an embedded space and return that transformed
         output.
 
         Parameters
         ----------
-        X : array, shape(n_samples, n_features)
-            [description]
+        x : np.array, shape(n_features,)
+
+        Returns
+        -------
+        embedding: np.array, shape(n_out_dim, )
         """
-        pass
+        self._update_neighbors(x)
+        i_1 = self.neighbor_idxs[0]
+        return self.embeddings[i_1]
 
 
 if __name__ == "__main__":
     a = np.random.normal(2, 2, (20, 5))
     b = np.random.normal(0, 2, (20, 5))
-    c = np.random.normal(-3, 1, (15, 5))
-    d = np.random.normal(5, 1, (10, 5))
+    c = np.random.normal(-3, 1, (20, 5))
+    d = np.random.normal(5, 1, (20, 5))
     X = np.vstack((a, b, c, d))
     model = SONG()
     model.fit(X)
