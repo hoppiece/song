@@ -14,13 +14,18 @@ class Topology(dict):
         for i in range(n_coding_vector):
             self[i] = dict()
 
-    def check_symmetric(self):
+    def check_topology(self) -> None:
         for key, adjacency in self.items():
             for node, val in adjacency.items():
                 if abs(val - self[node][key]) > 0.0001:
                     msg = "Topology is not symmetric. E[{}][{}]={},\
                     but E[{}][{}]={}".format(
                         key, node, val, node, key, self[node][key]
+                    )
+                    raise ValueError(msg)
+                if key == node:
+                    msg = "Tere exists a diagonal element. E[{}][{}]={}".format(
+                        key, node, val
                     )
                     raise ValueError(msg)
 
@@ -35,7 +40,7 @@ class SONG:
         negative_sample_rate=1,  # r: not mentioned in the paper
         a=1.577,
         b=0.895,  # hyper parameter, not mentioned in the paper
-        theta_g=0.5,  # not mentioned in the paper.
+        theta_g=100,  # not mentioned in the paper.
         min_edge_weight=0.1,  # not mentioned in the paper
         edge_decay_rate=0.99,  # epsilon
     ) -> None:
@@ -121,6 +126,7 @@ class SONG:
     def _refine_topology(self, x) -> None:
         """append the element in C, E, Y, G
         """
+        i_1 = self.neighbor_idxs[0]
         k_idxs = self.neighbor_idxs[: self.n_neighbors]
         new_vector = (x + np.sum(self.coding_vector[k_idxs], axis=0)) / (
             self.n_neighbors + 1
@@ -136,8 +142,18 @@ class SONG:
                 self.n_coding_vector
             ][j]
         self.grow_rate = np.append(self.grow_rate, 0.0)
-
+        self.grow_rate[i_1] = 0.0
+        # Above step does not mention in the paper, but I think this is need.
         self.n_coding_vector += 1
+
+    def _set_embedding_label(self) -> None:
+        self.raw_embeddings = np.zeros((self.X.shape[0], self.embeddings.shape[1]))
+        self.embedding_label = np.zeros(len(self.embeddings))
+        for i, x in enumerate(self.X):
+            self._update_neighbors(x)
+            i_1 = self.neighbor_idxs[0]
+            self.raw_embeddings[i] = self.embeddings[i_1]
+            self.embedding_label[i_1] = self.X_label[i]
 
     def fit(self, X: np.array, X_label=None) -> None:
         """Fit X in t an embedded space.
@@ -161,17 +177,26 @@ class SONG:
         is_execute = False
         ephoc = 0
         while not is_execute:
+            print(
+                "epoch: {} n_codev: {} m_grow_rate: {}".format(
+                    ephoc, self.n_coding_vector, np.mean(self.grow_rate)
+                )
+            )
             for idx in np.random.permutation(self.n_in_data_num):
                 self.idx = idx
                 x = self.X[idx]
                 self._update_neighbors(x)
                 i_1 = self.neighbor_idxs[0]
-                old_connecteds = set(self.topology[i_1].keys())
+                old_connecteds = set(self.topology[i_1].items())
                 self._edge_curation()
-                connecteds = set(self.topology[i_1].keys())
+                connecteds = set(self.topology[i_1].items())
                 if old_connecteds == connecteds and ephoc > 0:
                     is_execute = True
                     break
+                    """
+                    This END condition is something wrong,
+                    though I implemented it as described in the paper.
+                    """
 
                 self._organize_coding_vector(x)
                 self._update_embeddings()
@@ -183,6 +208,12 @@ class SONG:
             ephoc += 1
             if ephoc >= self.n_max_epoch:
                 is_execute = True
+
+        self.topology.check_topology()
+
+        if self.X_label is not None:
+            self._set_embedding_label()
+        print("finished")
 
     def transform(self, x: np.array) -> np.array:
         """Fit X into an embedded space and return that transformed
