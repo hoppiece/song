@@ -12,3 +12,5 @@
 ```
 $ python mnist_trial.py
 ```
+
+Some issues are described in this PR: https://github.com/hoppiece/song/pull/2
