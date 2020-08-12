@@ -187,9 +187,9 @@ class SONG:
                 x = self.X[idx]
                 self._update_neighbors(x)
                 i_1 = self.neighbor_idxs[0]
-                old_connecteds = set(self.topology[i_1].items())
+                old_connecteds = set(self.topology[i_1].keys())
                 self._edge_curation()
-                connecteds = set(self.topology[i_1].items())
+                connecteds = set(self.topology[i_1].keys())
                 if old_connecteds == connecteds and ephoc > 0:
                     is_execute = True
                     break
