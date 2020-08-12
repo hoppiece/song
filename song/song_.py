@@ -1,3 +1,5 @@
+import copy
+
 import numpy as np
 
 
@@ -62,6 +64,7 @@ class SONG:
         self.topology = None
         self.grow_rate = None  # G
         self.alpha = None
+        self.old_topology = None
 
         self.neighbor_idxs = None
 
@@ -182,21 +185,23 @@ class SONG:
                     ephoc, self.n_coding_vector, np.mean(self.grow_rate)
                 )
             )
+            is_execute = True
             for idx in np.random.permutation(self.n_in_data_num):
                 self.idx = idx
                 x = self.X[idx]
                 self._update_neighbors(x)
                 i_1 = self.neighbor_idxs[0]
-                old_connecteds = set(self.topology[i_1].keys())
                 self._edge_curation()
+                if self.old_topology is not None:
+                    if i_1 in self.old_topology:
+                        old_connecteds = set(self.old_topology[i_1].keys())
+                    else:
+                        old_connecteds = None
+                else:
+                    old_connecteds = None
                 connecteds = set(self.topology[i_1].keys())
-                if old_connecteds == connecteds and ephoc > 0:
-                    is_execute = True
-                    break
-                    """
-                    This END condition is something wrong,
-                    though I implemented it as described in the paper.
-                    """
+                if old_connecteds != connecteds:
+                    is_execute = False
 
                 self._organize_coding_vector(x)
                 self._update_embeddings()
@@ -204,6 +209,7 @@ class SONG:
                 if self.grow_rate[i_1] > self.theta_g:
                     self._refine_topology(x)
 
+            self.old_topology = copy.deepcopy(self.topology)
             self.alpha = self.init_alpha * (1 - ephoc / self.n_max_epoch)
             ephoc += 1
             if ephoc >= self.n_max_epoch:
