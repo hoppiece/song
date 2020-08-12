@@ -75,7 +75,7 @@ class SONG:
             )
         )
 
-    def _edge_curation(self) -> None:
+    def _edge_curation_(self) -> None:
         """Updating the directional edge. Algorithem 2 in the paper.
         In this implementation, the graph always keep symmetric.
         """
@@ -89,6 +89,28 @@ class SONG:
         for j in self.neighbor_idxs[1 : self.n_neighbors]:
             self.topology[i_1][j] = 1.0  # Renew edges
             self.topology[j][i_1] = self.topology[i_1][j]
+
+    def _edge_curation(self, x) -> None:
+        i_1 = self.neighbor_idxs[0]
+        for j in self.neighbor_idxs[1 : self.n_neighbors]:
+            if np.linalg.norm(x - self.coding_vector[j]) <= np.linalg.norm(
+                x - self.coding_vector[self.n_neighbors - 1]
+            ):
+                self.topology[i_1][j] = 1.0
+                self.topology[j][i_1] = 1.0
+
+            else:
+                try:
+                    self.topology[i_1][j] *= self.edge_decay_rate
+                    self.topology[j][i_1] = self.topology[i_1][j]
+                except KeyError:
+                    pass
+            try:
+                if self.topology[i_1][j] < self.min_edge_weight:
+                    del self.topology[i_1][j]
+                    del self.topology[j][i_1]
+            except KeyError:
+                pass
 
     def _organize_coding_vector(self, x: np.array) -> None:
         i_1 = self.neighbor_idxs[0]
@@ -188,7 +210,7 @@ class SONG:
                 self._update_neighbors(x)
                 i_1 = self.neighbor_idxs[0]
                 old_connecteds = set(self.topology[i_1].keys())
-                self._edge_curation()
+                self._edge_curation(x)
                 connecteds = set(self.topology[i_1].keys())
                 if old_connecteds == connecteds and ephoc > 0:
                     is_execute = True
