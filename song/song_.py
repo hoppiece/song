@@ -35,7 +35,7 @@ class Topology(dict):
 class SONG:
     def __init__(
         self,
-        n_max_epoch=100,  # t_max: max iteration num,
+        n_max_epoch=10,  # t_max: max iteration num,
         n_out_dim=2,  # d: output dim
         n_neighbors=3,  # k: number of neighbors to search
         alpha=1.0,  # learning rate
@@ -72,11 +72,18 @@ class SONG:
         """Update I^(k) TODO this step can be faster, via KD tree. see
         umap implementation.
         """
-        self.neighbor_idxs = np.argsort(
-            np.linalg.norm(
-                self.coding_vector - np.full(self.coding_vector.shape, x), axis=1,
-            )
+        dists = np.linalg.norm(
+            self.coding_vector - np.full(self.coding_vector.shape, x), axis=1,
         )
+        if self.n_coding_vector <= self.n_neighbors:
+            self.neighbor_idxs = np.argsort(dists)
+        else:
+            unsorted_min_indices = np.argpartition(dists, self.n_neighbors)[
+                : self.n_neighbors
+            ]
+            min_dists = dists[unsorted_min_indices]
+            sorted_min_indices = np.argsort(min_dists)
+            self.neighbor_idxs = unsorted_min_indices[sorted_min_indices]
 
     def _edge_curation(self) -> None:
         """Updating the directional edge. Algorithem 2 in the paper.
@@ -89,13 +96,13 @@ class SONG:
             if self.topology[i_1][j] < self.min_edge_weight:
                 del self.topology[i_1][j]  # Prune edges
                 del self.topology[j][i_1]
-        for j in self.neighbor_idxs[1 : self.n_neighbors]:
+        for j in self.neighbor_idxs[1:]:
             self.topology[i_1][j] = 1.0  # Renew edges
             self.topology[j][i_1] = self.topology[i_1][j]
 
     def _organize_coding_vector(self, x: np.array) -> None:
         i_1 = self.neighbor_idxs[0]
-        i_k = self.neighbor_idxs[self.n_neighbors - 1]
+        i_k = self.neighbor_idxs
         w = np.linalg.norm(x - self.coding_vector[i_k]) ** 2
         for j in self.topology[i_1].keys():
             dire = x - self.coding_vector[j]
@@ -106,7 +113,8 @@ class SONG:
     def _update_embeddings(self) -> None:
         i_1 = self.neighbor_idxs[0]
         connecteds = self.topology[i_1].keys()
-        negative_edges = {i for i in range(len(self.topology))} - connecteds
+        negative_edges = list({i for i in range(len(self.topology))} - connecteds)
+        n_negative_edges = len(negative_edges)
         n_negative_sample = int(self.negative_sample_rate * len(connecteds))
 
         a = self.a
@@ -118,7 +126,8 @@ class SONG:
             nabla = (2 * a * b * e * dist ** (2 * b - 2)) / (1 + dist ** (2 * b))
             self.embeddings[j] += self.alpha * nabla * dire
 
-        for j in np.random.permutation(list(negative_edges))[:n_negative_sample]:
+        for idx in np.random.randint(0, n_negative_edges, n_negative_sample):
+            j = negative_edges[idx]
             if j == i_1:
                 continue
             dire = self.embeddings[i_1] - self.embeddings[j]
@@ -130,7 +139,7 @@ class SONG:
         """append the element in C, E, Y, G
         """
         i_1 = self.neighbor_idxs[0]
-        k_idxs = self.neighbor_idxs[: self.n_neighbors]
+        k_idxs = self.neighbor_idxs
         new_vector = (x + np.sum(self.coding_vector[k_idxs], axis=0)) / (
             self.n_neighbors + 1
         )
