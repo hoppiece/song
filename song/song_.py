@@ -35,7 +35,7 @@ class Topology(dict):
 class SONG:
     def __init__(
         self,
-        n_max_epoch=10,  # t_max: max iteration num,
+        n_max_epoch=100,  # t_max: max iteration num,
         n_out_dim=2,  # d: output dim
         n_neighbors=3,  # k: number of neighbors to search
         alpha=1.0,  # learning rate
@@ -187,11 +187,11 @@ class SONG:
         self.alpha = self.init_alpha
 
         is_execute = False
-        ephoc = 0
+        epoch = 0
         while not is_execute:
             print(
                 "epoch: {} n_codev: {} m_grow_rate: {}".format(
-                    ephoc, self.n_coding_vector, np.mean(self.grow_rate)
+                    epoch, self.n_coding_vector, np.mean(self.grow_rate)
                 )
             )
             is_execute = True
@@ -219,9 +219,9 @@ class SONG:
                     self._refine_topology(x)
 
             self.old_topology = copy.deepcopy(self.topology)
-            self.alpha = self.init_alpha * (1 - ephoc / self.n_max_epoch)
-            ephoc += 1
-            if ephoc >= self.n_max_epoch:
+            self.alpha = self.init_alpha * (1 - epoch / self.n_max_epoch)
+            epoch += 1
+            if epoch >= self.n_max_epoch:
                 is_execute = True
 
         self.topology.check_topology()
