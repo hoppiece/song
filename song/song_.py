@@ -75,8 +75,9 @@ class SONG:
         dists = np.linalg.norm(
             self.coding_vector - np.full(self.coding_vector.shape, x), axis=1,
         )
-        if self.n_coding_vector <= self.n_neighbors:
-            self.neighbor_idxs = np.argsort(dists)
+        # if self.n_coding_vector <= self.n_neighbors:
+        self.neighbor_idxs = np.argsort(dists)
+        """ 
         else:
             unsorted_min_indices = np.argpartition(dists, self.n_neighbors)[
                 : self.n_neighbors
@@ -84,6 +85,7 @@ class SONG:
             min_dists = dists[unsorted_min_indices]
             sorted_min_indices = np.argsort(min_dists)
             self.neighbor_idxs = unsorted_min_indices[sorted_min_indices]
+        """
 
     def _edge_curation(self) -> None:
         """Updating the directional edge. Algorithem 2 in the paper.
@@ -96,13 +98,13 @@ class SONG:
             if self.topology[i_1][j] < self.min_edge_weight:
                 del self.topology[i_1][j]  # Prune edges
                 del self.topology[j][i_1]
-        for j in self.neighbor_idxs[1:]:
+        for j in self.neighbor_idxs[1 : self.n_neighbors]:
             self.topology[i_1][j] = 1.0  # Renew edges
             self.topology[j][i_1] = self.topology[i_1][j]
 
     def _organize_coding_vector(self, x: np.array) -> None:
         i_1 = self.neighbor_idxs[0]
-        i_k = self.neighbor_idxs
+        i_k = self.neighbor_idxs[self.n_neighbors - 1]
         w = np.linalg.norm(x - self.coding_vector[i_k]) ** 2
         for j in self.topology[i_1].keys():
             dire = x - self.coding_vector[j]
@@ -139,7 +141,7 @@ class SONG:
         """append the element in C, E, Y, G
         """
         i_1 = self.neighbor_idxs[0]
-        k_idxs = self.neighbor_idxs
+        k_idxs = self.neighbor_idxs[: self.n_neighbors]
         new_vector = (x + np.sum(self.coding_vector[k_idxs], axis=0)) / (
             self.n_neighbors + 1
         )
