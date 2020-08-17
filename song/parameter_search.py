@@ -1,5 +1,5 @@
 import argparse
-import os.path
+import os
 import pickle
 import time
 import json
@@ -78,6 +78,8 @@ def savegraph(embeddings, labels, filename, title):
     plt.colorbar()
     plt.title(title)
     plt.savefig(filename)
+    plt.clf()
+    plt.close()
 
 
 def accuracy(embedding, label):
@@ -153,18 +155,36 @@ def umap_(n_class, data, labels, filename):
 
 
 def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("output", type=str, help="path to the output")
+    args = parser.parse_args()
+
     mnist = loader()
     data = mnist["data"][:MAX_DATA_NUM]
     labels = mnist["target"][:MAX_DATA_NUM]
 
     params = [
-        (0.5 + 0.2 * i, 0.4 + 0.2 * j, 25 * k)
-        for i in range(10)
-        for j in range(10)
-        for k in range(1, 6)
+        (g, a, b)
+        for g in [20, 40, 60, 80, 100]
+        for a in [
+            0.1,
+            0.2,
+            0.3,
+            0.4,
+            0.5,
+            0.6,
+            0.7,
+            0.8,
+            0.9,
+            1.0,
+            1.1,
+            1.2,
+            1.3,
+            1.4,
+            1.5,
+        ]
+        for b in [0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7]
     ]
-
-    results = []
 
     data, labels = to_n_class([0, 1, 2], data, labels)
     data = normalize(data)
@@ -172,48 +192,58 @@ def main():
         prep_model = PCA(n_components=20)
         data = prep_model.fit_transform(data)
 
-    for i, param in enumerate(params):
-        a = param[0]
-        b = param[1]
-        g = param[2]
+    if not os.path.exists("3cls"):
+        os.mkdir("3cls")
+    if not os.path.exists("5cls"):
+        os.mkdir("5cls")
 
-        filename = os.path.join("../figure/3cls", "SONG_3cls_{}".format(i))
-        result = song(3, data, labels, 100, a, b, g, filename)
-        results.append(result)
+    try:
+        with open(args.output, mode="x"):
+            pass
+    except FileExistsError:
+        pass
 
-    filename = os.path.join("../figure/3cls", "TSNE_3cls")
-    result = tsne(3, data, labels, filename)
-    results.append(result)
+    with open(args.output, mode="a") as fp:
 
-    filename = os.path.join("../figure/3cls", "UMAP_3cls")
-    result = umap_(3, data, labels, filename)
-    results.append(result)
+        for i, param in enumerate(params):
+            g = param[0]
+            a = param[1]
+            b = param[2]
 
-    data, labels = to_n_class([0, 1, 2, 3, 4], data, labels)
-    data = normalize(data)
-    if data.shape[1] > 20:
-        prep_model = PCA(n_components=20)
-        data = prep_model.fit_transform(data)
+            filename = os.path.join("3cls", "SONG_3cls_{}".format(i))
+            result = song(3, data, labels, 100, a, b, g, filename)
+            print(json.dumps(result) + "\n", file=fp)
 
-    for i, param in enumerate(params):
-        a = param[0]
-        b = param[1]
-        g = param[2]
+        filename = os.path.join("3cls", "TSNE_3cls")
+        result = tsne(3, data, labels, filename)
+        print(json.dumps(result) + "\n", file=fp)
 
-        filename = os.path.join("../figure/5cls", "SONG_5cls_{}".format(i))
-        result = song(5, data, labels, 100, a, b, g, filename)
-        results.append(result)
+        filename = os.path.join("3cls", "UMAP_3cls")
+        result = umap_(3, data, labels, filename)
+        print(json.dumps(result) + "\n", file=fp)
 
-    filename = os.path.join("../figure/5cls", "TSNE_5cls")
-    result = tsne(5, data, labels, filename)
-    results.append(result)
+        data, labels = to_n_class([0, 1, 2, 3, 4], data, labels)
+        data = normalize(data)
+        if data.shape[1] > 20:
+            prep_model = PCA(n_components=20)
+            data = prep_model.fit_transform(data)
 
-    filename = os.path.join("../figure/5cls", "UMAP_5cls")
-    result = umap_(5, data, labels, filename)
-    results.append(result)
+        for i, param in enumerate(params):
+            a = param[0]
+            b = param[1]
+            g = param[2]
 
-    with open("result.json", "r") as fp:
-        json.dump(results, fp, indent="\t")
+            filename = os.path.join("5cls", "SONG_5cls_{}".format(i))
+            result = song(5, data, labels, 100, a, b, g, filename)
+            print(json.dumps(result) + "\n", file=fp)
+
+        filename = os.path.join("5cls", "TSNE_5cls")
+        result = tsne(5, data, labels, filename)
+        print(json.dumps(result) + "\n", file=fp)
+
+        filename = os.path.join("5cls", "UMAP_5cls")
+        result = umap_(5, data, labels, filename)
+        print(json.dumps(result) + "\n", file=fp)
 
 
 if __name__ == "__main__":
