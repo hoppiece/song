@@ -183,6 +183,8 @@ def main():
         data = prep_model.fit_transform(data)
 
     for i, param in enumerate(params):
+        if i <160:
+            continue
         g = param[0]
         a = param[1]
         b = param[2]
