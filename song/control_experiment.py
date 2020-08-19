@@ -161,55 +161,14 @@ def main():
     data = mnist["data"][:MAX_DATA_NUM]
     labels = mnist["target"][:MAX_DATA_NUM]
 
-    params = [
-        (g, a, b)
-        for g in [20, 40, 60, 80, 100]
-        for a in [
-            0.5,
-            0.1,
-            0.2,
-            0.3,
-            0.4,
-            0.5,
-            0.6,
-            0.7,
-            0.8,
-            0.9,
-            1.0,
-            1.1,
-            1.2,
-            1.3,
-            1.4,
-            1.5,
-        ]
-        for b in [
-            0.05,
-            0.1,
-            0.15,
-            0.2,
-            0.25,
-            0.3,
-            0.35,
-            0.4,
-            0.45,
-            0.5,
-            0.55,
-            0.6,
-            0.65,
-            0.7,
-        ]
-    ]
-
-    data, labels = to_n_class([0, 1, 2], data, labels)
+    data, labels = to_n_class(range(10), data, labels)
     data = normalize(data)
     if data.shape[1] > 20:
         prep_model = PCA(n_components=20)
         data = prep_model.fit_transform(data)
 
-    if not os.path.exists("3cls"):
-        os.mkdir("3cls")
-    if not os.path.exists("5cls"):
-        os.mkdir("5cls")
+    if not os.path.exists("10cls"):
+        os.mkdir("10cls")
 
     try:
         with open(args.output, mode="x"):
@@ -217,51 +176,15 @@ def main():
     except FileExistsError:
         pass
 
-    for i, param in enumerate(params):
-        g = param[0]
-        a = param[1]
-        b = param[2]
-
-        filename = os.path.join("3cls", "SONG_3cls_{}".format(i))
-        result = song(3, data, labels, 100, a, b, g, filename)
-        with open(args.output, mode="a") as fp:
-            print(json.dumps(result) + "\n", file=fp)
-
-    filename = os.path.join("3cls", "TSNE_3cls")
-    result = tsne(3, data, labels, filename)
+    filename = os.path.join("10cls", "TSNE_10cls")
+    result = tsne(10, data, labels, filename)
     with open(args.output, mode="a") as fp:
-        print(json.dumps(result) + "\n", file=fp)
+        print(json.dumps(result), file=fp)
 
-    filename = os.path.join("3cls", "UMAP_3cls")
-    result = umap_(3, data, labels, filename)
+    filename = os.path.join("10cls", "UMAP_10cls")
+    result = umap_(10, data, labels, filename)
     with open(args.output, mode="a") as fp:
-        print(json.dumps(result) + "\n", file=fp)
-
-    data, labels = to_n_class([0, 1, 2, 3, 4], data, labels)
-    data = normalize(data)
-    if data.shape[1] > 20:
-        prep_model = PCA(n_components=20)
-        data = prep_model.fit_transform(data)
-
-    for i, param in enumerate(params):
-        g = param[0]
-        a = param[1]
-        b = param[2]
-
-        filename = os.path.join("5cls", "SONG_5cls_{}".format(i))
-        result = song(5, data, labels, 100, a, b, g, filename)
-        with open(args.output, mode="a") as fp:
-            print(json.dumps(result) + "\n", file=fp)
-
-    filename = os.path.join("5cls", "TSNE_5cls")
-    result = tsne(5, data, labels, filename)
-    with open(args.output, mode="a") as fp:
-        print(json.dumps(result) + "\n", file=fp)
-
-    filename = os.path.join("5cls", "UMAP_5cls")
-    result = umap_(5, data, labels, filename)
-    with open(args.output, mode="a") as fp:
-        print(json.dumps(result) + "\n", file=fp)
+        print(json.dumps(result) , file=fp)
 
 
 if __name__ == "__main__":

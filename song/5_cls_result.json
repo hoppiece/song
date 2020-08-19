@@ -364,3 +364,51 @@
 
 {"method": "SONG", "class": 5, "accuracy": 0.937244201909959, "time": 391.98649430274963, "hyperparam": {"n_max_epoch": 100, "a": 0.5, "b": 0.35, "theta_g": 40}}
 
+{"method": "SONG", "class": 5, "accuracy": 0.9347105827324108, "time": 393.2434391975403, "hyperparam": {"n_max_epoch": 100, "a": 0.5, "b": 0.4, "theta_g": 40}}
+
+{"method": "SONG", "class": 5, "accuracy": 0.8969011888520756, "time": 393.91248655319214, "hyperparam": {"n_max_epoch": 100, "a": 0.5, "b": 0.45, "theta_g": 40}}
+
+{"method": "SONG", "class": 5, "accuracy": 0.9136620541804716, "time": 394.0624430179596, "hyperparam": {"n_max_epoch": 100, "a": 0.5, "b": 0.5, "theta_g": 40}}
+
+{"method": "SONG", "class": 5, "accuracy": 0.904307152601832, "time": 392.3893520832062, "hyperparam": {"n_max_epoch": 100, "a": 0.5, "b": 0.55, "theta_g": 40}}
+
+{"method": "SONG", "class": 5, "accuracy": 0.9107386474371467, "time": 391.7029814720154, "hyperparam": {"n_max_epoch": 100, "a": 0.6, "b": 0.05, "theta_g": 40}}
+
+{"method": "SONG", "class": 5, "accuracy": 0.887546287273436, "time": 394.51999139785767, "hyperparam": {"n_max_epoch": 100, "a": 0.6, "b": 0.1, "theta_g": 40}}
+
+{"method": "SONG", "class": 5, "accuracy": 0.913272266614695, "time": 393.2267231941223, "hyperparam": {"n_max_epoch": 100, "a": 0.6, "b": 0.15, "theta_g": 40}}
+
+{"method": "SONG", "class": 5, "accuracy": 0.946793997271487, "time": 394.86445593833923, "hyperparam": {"n_max_epoch": 100, "a": 0.6, "b": 0.2, "theta_g": 40}}
+
+{"method": "SONG", "class": 5, "accuracy": 0.9347105827324108, "time": 392.1793143749237, "hyperparam": {"n_max_epoch": 100, "a": 0.6, "b": 0.25, "theta_g": 40}}
+
+{"method": "SONG", "class": 5, "accuracy": 0.9493276164490353, "time": 393.3655457496643, "hyperparam": {"n_max_epoch": 100, "a": 0.6, "b": 0.3, "theta_g": 40}}
+
+{"method": "SONG", "class": 5, "accuracy": 0.9446501656597155, "time": 394.9038426876068, "hyperparam": {"n_max_epoch": 100, "a": 0.6, "b": 0.35, "theta_g": 40}}
+
+{"method": "SONG", "class": 5, "accuracy": 0.9469888910543753, "time": 399.0067386627197, "hyperparam": {"n_max_epoch": 100, "a": 0.6, "b": 0.4, "theta_g": 40}}
+
+{"method": "SONG", "class": 5, "accuracy": 0.9046969401676086, "time": 394.24469542503357, "hyperparam": {"n_max_epoch": 100, "a": 0.6, "b": 0.45, "theta_g": 40}}
+
+{"method": "SONG", "class": 5, "accuracy": 0.9349054765152992, "time": 389.60150480270386, "hyperparam": {"n_max_epoch": 100, "a": 0.6, "b": 0.5, "theta_g": 40}}
+
+{"method": "SONG", "class": 5, "accuracy": 0.9078152406938219, "time": 393.34269189834595, "hyperparam": {"n_max_epoch": 100, "a": 0.6, "b": 0.55, "theta_g": 40}}
+
+{"method": "SONG", "class": 5, "accuracy": 0.837263691288248, "time": 392.0295422077179, "hyperparam": {"n_max_epoch": 100, "a": 0.7, "b": 0.05, "theta_g": 40}}
+
+{"method": "SONG", "class": 5, "accuracy": 0.8910543753654259, "time": 394.9159052371979, "hyperparam": {"n_max_epoch": 100, "a": 0.7, "b": 0.1, "theta_g": 40}}
+
+{"method": "SONG", "class": 5, "accuracy": 0.9282790878970961, "time": 393.6271393299103, "hyperparam": {"n_max_epoch": 100, "a": 0.7, "b": 0.15, "theta_g": 40}}
+
+{"method": "SONG", "class": 5, "accuracy": 0.9243812122393296, "time": 390.8463485240936, "hyperparam": {"n_max_epoch": 100, "a": 0.7, "b": 0.2, "theta_g": 40}}
+
+{"method": "SONG", "class": 5, "accuracy": 0.9543948548041318, "time": 392.2752139568329, "hyperparam": {"n_max_epoch": 100, "a": 0.7, "b": 0.25, "theta_g": 40}}
+
+{"method": "SONG", "class": 5, "accuracy": 0.9448450594426038, "time": 390.6281244754791, "hyperparam": {"n_max_epoch": 100, "a": 0.7, "b": 0.3, "theta_g": 40}}
+
+{"method": "SONG", "class": 5, "accuracy": 0.9415318651335023, "time": 392.1627504825592, "hyperparam": {"n_max_epoch": 100, "a": 0.7, "b": 0.35, "theta_g": 40}}
+
+{"method": "SONG", "class": 5, "accuracy": 0.9368544143441824, "time": 397.6228804588318, "hyperparam": {"n_max_epoch": 100, "a": 0.7, "b": 0.4, "theta_g": 40}}
+
+{"method": "SONG", "class": 5, "accuracy": 0.9362697329955174, "time": 398.2993218898773, "hyperparam": {"n_max_epoch": 100, "a": 0.7, "b": 0.45, "theta_g": 40}}
+
