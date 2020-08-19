@@ -1150,3 +1150,41 @@
 
 {"method": "SONG", "class": 3, "accuracy": 0.9769156781019558, "time": 181.3733229637146, "hyperparam": {"n_max_epoch": 100, "a": 0.8, "b": 0.2, "theta_g": 100}}
 
+{"method": "SONG", "class": 3, "accuracy": 0.973709522282783, "time": 183.5673372745514, "hyperparam": {"n_max_epoch": 100, "a": 0.8, "b": 0.25, "theta_g": 100}}
+
+{"method": "SONG", "class": 3, "accuracy": 0.9756332157742866, "time": 187.17232751846313, "hyperparam": {"n_max_epoch": 100, "a": 0.8, "b": 0.3, "theta_g": 100}}
+
+{"method": "SONG", "class": 3, "accuracy": 0.9753126001923693, "time": 182.7235233783722, "hyperparam": {"n_max_epoch": 100, "a": 0.8, "b": 0.35, "theta_g": 100}}
+
+{"method": "SONG", "class": 3, "accuracy": 0.979480602757294, "time": 179.83280563354492, "hyperparam": {"n_max_epoch": 100, "a": 0.8, "b": 0.4, "theta_g": 100}}
+
+{"method": "SONG", "class": 3, "accuracy": 0.9753126001923693, "time": 180.1287088394165, "hyperparam": {"n_max_epoch": 100, "a": 0.8, "b": 0.45, "theta_g": 100}}
+
+{"method": "SONG", "class": 3, "accuracy": 0.977236293683873, "time": 181.52653408050537, "hyperparam": {"n_max_epoch": 100, "a": 0.8, "b": 0.5, "theta_g": 100}}
+
+{"method": "SONG", "class": 3, "accuracy": 0.9608848990060916, "time": 181.91462302207947, "hyperparam": {"n_max_epoch": 100, "a": 0.8, "b": 0.55, "theta_g": 100}}
+
+{"method": "SONG", "class": 3, "accuracy": 0.9143956396280859, "time": 182.09016680717468, "hyperparam": {"n_max_epoch": 100, "a": 0.9, "b": 0.05, "theta_g": 100}}
+
+{"method": "SONG", "class": 3, "accuracy": 0.9592818210965053, "time": 180.4699091911316, "hyperparam": {"n_max_epoch": 100, "a": 0.9, "b": 0.1, "theta_g": 100}}
+
+{"method": "SONG", "class": 3, "accuracy": 0.9644116704071818, "time": 185.46076560020447, "hyperparam": {"n_max_epoch": 100, "a": 0.9, "b": 0.15, "theta_g": 100}}
+
+{"method": "SONG", "class": 3, "accuracy": 0.9705033664636101, "time": 185.88794088363647, "hyperparam": {"n_max_epoch": 100, "a": 0.9, "b": 0.2, "theta_g": 100}}
+
+{"method": "SONG", "class": 3, "accuracy": 0.9753126001923693, "time": 182.91057801246643, "hyperparam": {"n_max_epoch": 100, "a": 0.9, "b": 0.25, "theta_g": 100}}
+
+{"method": "SONG", "class": 3, "accuracy": 0.9740301378647003, "time": 183.80095624923706, "hyperparam": {"n_max_epoch": 100, "a": 0.9, "b": 0.3, "theta_g": 100}}
+
+{"method": "SONG", "class": 3, "accuracy": 0.9708239820455274, "time": 183.1199471950531, "hyperparam": {"n_max_epoch": 100, "a": 0.9, "b": 0.35, "theta_g": 100}}
+
+{"method": "SONG", "class": 3, "accuracy": 0.9676178262263546, "time": 182.87405133247375, "hyperparam": {"n_max_epoch": 100, "a": 0.9, "b": 0.4, "theta_g": 100}}
+
+{"method": "SONG", "class": 3, "accuracy": 0.958961205514588, "time": 184.7060832977295, "hyperparam": {"n_max_epoch": 100, "a": 0.9, "b": 0.45, "theta_g": 100}}
+
+{"method": "SONG", "class": 3, "accuracy": 0.9695415197178583, "time": 182.77224683761597, "hyperparam": {"n_max_epoch": 100, "a": 0.9, "b": 0.5, "theta_g": 100}}
+
+{"method": "SONG", "class": 3, "accuracy": 0.9579993587688361, "time": 183.05668568611145, "hyperparam": {"n_max_epoch": 100, "a": 0.9, "b": 0.55, "theta_g": 100}}
+
+{"method": "SONG", "class": 3, "accuracy": 0.9067008656620712, "time": 183.83868956565857, "hyperparam": {"n_max_epoch": 100, "a": 1.0, "b": 0.05, "theta_g": 100}}
+
