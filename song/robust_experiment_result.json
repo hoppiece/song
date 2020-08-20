@@ -7,3 +7,5 @@
 {"method": "SONG", "class": 5, "accuracy": 0.19820697719742741, "time": 4147.619012117386, "noise_size": 0.6000000000000001}
 {"method": "SONG", "class": 5, "accuracy": 0.22022997466380823, "time": 4159.931790113449, "noise_size": 0.7000000000000001}
 {"method": "SONG", "class": 5, "accuracy": 0.21223932956538685, "time": 3857.5061571598053, "noise_size": 0.8}
+{"method": "SONG", "class": 5, "accuracy": 0.19255505749366594, "time": 4290.484808921814, "noise_size": 0.9}
+{"method": "SONG", "class": 5, "accuracy": 0.21145975443383355, "time": 4903.636341094971, "noise_size": 1.0}
