@@ -566,3 +566,169 @@
 
 {"method": "SONG", "class": 5, "accuracy": 0.9027480023387254, "time": 385.27885913848877, "hyperparam": {"n_max_epoch": 100, "a": 0.3, "b": 0.45, "theta_g": 60}}
 
+{"method": "SONG", "class": 5, "accuracy": 0.8592866887546288, "time": 380.8896048069, "hyperparam": {"n_max_epoch": 100, "a": 0.3, "b": 0.5, "theta_g": 60}}
+
+{"method": "SONG", "class": 5, "accuracy": 0.8514909374390957, "time": 379.80044770240784, "hyperparam": {"n_max_epoch": 100, "a": 0.3, "b": 0.55, "theta_g": 60}}
+
+{"method": "SONG", "class": 5, "accuracy": 0.8674722276359385, "time": 376.8769929409027, "hyperparam": {"n_max_epoch": 100, "a": 0.4, "b": 0.05, "theta_g": 60}}
+
+{"method": "SONG", "class": 5, "accuracy": 0.8818943675696745, "time": 376.00810384750366, "hyperparam": {"n_max_epoch": 100, "a": 0.4, "b": 0.1, "theta_g": 60}}
+
+{"method": "SONG", "class": 5, "accuracy": 0.9152212044435782, "time": 376.0716941356659, "hyperparam": {"n_max_epoch": 100, "a": 0.4, "b": 0.15, "theta_g": 60}}
+
+{"method": "SONG", "class": 5, "accuracy": 0.9413369713506139, "time": 369.90166878700256, "hyperparam": {"n_max_epoch": 100, "a": 0.4, "b": 0.2, "theta_g": 60}}
+
+{"method": "SONG", "class": 5, "accuracy": 0.9374390956928474, "time": 375.553183555603, "hyperparam": {"n_max_epoch": 100, "a": 0.4, "b": 0.25, "theta_g": 60}}
+
+{"method": "SONG", "class": 5, "accuracy": 0.9458195283570454, "time": 374.1940634250641, "hyperparam": {"n_max_epoch": 100, "a": 0.4, "b": 0.3, "theta_g": 60}}
+
+{"method": "SONG", "class": 5, "accuracy": 0.9234067433248879, "time": 367.35862374305725, "hyperparam": {"n_max_epoch": 100, "a": 0.4, "b": 0.35, "theta_g": 60}}
+
+{"method": "SONG", "class": 5, "accuracy": 0.9253556811537712, "time": 367.43330335617065, "hyperparam": {"n_max_epoch": 100, "a": 0.4, "b": 0.4, "theta_g": 60}}
+
+{"method": "SONG", "class": 5, "accuracy": 0.9070356655622686, "time": 368.3198699951172, "hyperparam": {"n_max_epoch": 100, "a": 0.4, "b": 0.45, "theta_g": 60}}
+
+{"method": "SONG", "class": 5, "accuracy": 0.9064509842136036, "time": 368.9396743774414, "hyperparam": {"n_max_epoch": 100, "a": 0.4, "b": 0.5, "theta_g": 60}}
+
+{"method": "SONG", "class": 5, "accuracy": 0.8770220229974663, "time": 369.4077498912811, "hyperparam": {"n_max_epoch": 100, "a": 0.4, "b": 0.55, "theta_g": 60}}
+
+{"method": "SONG", "class": 5, "accuracy": 0.8121223932956538, "time": 372.5264410972595, "hyperparam": {"n_max_epoch": 100, "a": 0.5, "b": 0.05, "theta_g": 60}}
+
+{"method": "SONG", "class": 5, "accuracy": 0.9011888520756188, "time": 370.6747398376465, "hyperparam": {"n_max_epoch": 100, "a": 0.5, "b": 0.1, "theta_g": 60}}
+
+{"method": "SONG", "class": 5, "accuracy": 0.91268758526603, "time": 371.2677972316742, "hyperparam": {"n_max_epoch": 100, "a": 0.5, "b": 0.15, "theta_g": 60}}
+
+{"method": "SONG", "class": 5, "accuracy": 0.9064509842136036, "time": 369.75700783729553, "hyperparam": {"n_max_epoch": 100, "a": 0.5, "b": 0.2, "theta_g": 60}}
+
+{"method": "SONG", "class": 5, "accuracy": 0.9465991034885987, "time": 366.0356402397156, "hyperparam": {"n_max_epoch": 100, "a": 0.5, "b": 0.25, "theta_g": 60}}
+
+{"method": "SONG", "class": 5, "accuracy": 0.938413564607289, "time": 371.5041480064392, "hyperparam": {"n_max_epoch": 100, "a": 0.5, "b": 0.3, "theta_g": 60}}
+
+{"method": "SONG", "class": 5, "accuracy": 0.9128824790489184, "time": 369.37880516052246, "hyperparam": {"n_max_epoch": 100, "a": 0.5, "b": 0.35, "theta_g": 60}}
+
+{"method": "SONG", "class": 5, "accuracy": 0.9354901578639642, "time": 373.73065638542175, "hyperparam": {"n_max_epoch": 100, "a": 0.5, "b": 0.4, "theta_g": 60}}
+
+{"method": "SONG", "class": 5, "accuracy": 0.8972909764178523, "time": 371.1168580055237, "hyperparam": {"n_max_epoch": 100, "a": 0.5, "b": 0.45, "theta_g": 60}}
+
+{"method": "SONG", "class": 5, "accuracy": 0.9179497174040148, "time": 371.9334170818329, "hyperparam": {"n_max_epoch": 100, "a": 0.5, "b": 0.5, "theta_g": 60}}
+
+{"method": "SONG", "class": 5, "accuracy": 0.9041122588189436, "time": 369.2606363296509, "hyperparam": {"n_max_epoch": 100, "a": 0.5, "b": 0.55, "theta_g": 60}}
+
+{"method": "SONG", "class": 5, "accuracy": 0.8269343207951666, "time": 367.281733751297, "hyperparam": {"n_max_epoch": 100, "a": 0.6, "b": 0.05, "theta_g": 60}}
+
+{"method": "SONG", "class": 5, "accuracy": 0.9113233287858117, "time": 369.2544813156128, "hyperparam": {"n_max_epoch": 100, "a": 0.6, "b": 0.1, "theta_g": 60}}
+
+{"method": "SONG", "class": 5, "accuracy": 0.9224322744104463, "time": 368.69926476478577, "hyperparam": {"n_max_epoch": 100, "a": 0.6, "b": 0.15, "theta_g": 60}}
+
+{"method": "SONG", "class": 5, "accuracy": 0.9483531475345937, "time": 369.19952058792114, "hyperparam": {"n_max_epoch": 100, "a": 0.6, "b": 0.2, "theta_g": 60}}
+
+{"method": "SONG", "class": 5, "accuracy": 0.9489378288832586, "time": 376.9953410625458, "hyperparam": {"n_max_epoch": 100, "a": 0.6, "b": 0.25, "theta_g": 60}}
+
+{"method": "SONG", "class": 5, "accuracy": 0.9442603780939388, "time": 371.16161608695984, "hyperparam": {"n_max_epoch": 100, "a": 0.6, "b": 0.3, "theta_g": 60}}
+
+{"method": "SONG", "class": 5, "accuracy": 0.9415318651335023, "time": 366.7156755924225, "hyperparam": {"n_max_epoch": 100, "a": 0.6, "b": 0.35, "theta_g": 60}}
+
+{"method": "SONG", "class": 5, "accuracy": 0.9284739816799844, "time": 373.19875288009644, "hyperparam": {"n_max_epoch": 100, "a": 0.6, "b": 0.4, "theta_g": 60}}
+
+{"method": "SONG", "class": 5, "accuracy": 0.9093743909569285, "time": 369.57541513442993, "hyperparam": {"n_max_epoch": 100, "a": 0.6, "b": 0.45, "theta_g": 60}}
+
+{"method": "SONG", "class": 5, "accuracy": 0.9165854609237966, "time": 370.3678033351898, "hyperparam": {"n_max_epoch": 100, "a": 0.6, "b": 0.5, "theta_g": 60}}
+
+{"method": "SONG", "class": 5, "accuracy": 0.9085948158253752, "time": 370.7628810405731, "hyperparam": {"n_max_epoch": 100, "a": 0.6, "b": 0.55, "theta_g": 60}}
+
+{"method": "SONG", "class": 5, "accuracy": 0.815240693821867, "time": 368.9842257499695, "hyperparam": {"n_max_epoch": 100, "a": 0.7, "b": 0.05, "theta_g": 60}}
+
+{"method": "SONG", "class": 5, "accuracy": 0.9019684272071721, "time": 372.0967082977295, "hyperparam": {"n_max_epoch": 100, "a": 0.7, "b": 0.1, "theta_g": 60}}
+
+{"method": "SONG", "class": 5, "accuracy": 0.9224322744104463, "time": 373.03594517707825, "hyperparam": {"n_max_epoch": 100, "a": 0.7, "b": 0.15, "theta_g": 60}}
+
+{"method": "SONG", "class": 5, "accuracy": 0.9481582537517054, "time": 369.8059616088867, "hyperparam": {"n_max_epoch": 100, "a": 0.7, "b": 0.2, "theta_g": 60}}
+
+{"method": "SONG", "class": 5, "accuracy": 0.9464042097057104, "time": 370.920529127121, "hyperparam": {"n_max_epoch": 100, "a": 0.7, "b": 0.25, "theta_g": 60}}
+
+{"method": "SONG", "class": 5, "accuracy": 0.9516663418436951, "time": 366.83718180656433, "hyperparam": {"n_max_epoch": 100, "a": 0.7, "b": 0.3, "theta_g": 60}}
+
+{"method": "SONG", "class": 5, "accuracy": 0.9471837848372637, "time": 371.70103693008423, "hyperparam": {"n_max_epoch": 100, "a": 0.7, "b": 0.35, "theta_g": 60}}
+
+{"method": "SONG", "class": 5, "accuracy": 0.9462093159228221, "time": 368.9099500179291, "hyperparam": {"n_max_epoch": 100, "a": 0.7, "b": 0.4, "theta_g": 60}}
+
+{"method": "SONG", "class": 5, "accuracy": 0.9191190801013448, "time": 371.0522577762604, "hyperparam": {"n_max_epoch": 100, "a": 0.7, "b": 0.45, "theta_g": 60}}
+
+{"method": "SONG", "class": 5, "accuracy": 0.913272266614695, "time": 370.9155354499817, "hyperparam": {"n_max_epoch": 100, "a": 0.7, "b": 0.5, "theta_g": 60}}
+
+{"method": "SONG", "class": 5, "accuracy": 0.9146365230949133, "time": 370.9652028083801, "hyperparam": {"n_max_epoch": 100, "a": 0.7, "b": 0.55, "theta_g": 60}}
+
+{"method": "SONG", "class": 5, "accuracy": 0.8546092379653089, "time": 373.8777506351471, "hyperparam": {"n_max_epoch": 100, "a": 0.8, "b": 0.05, "theta_g": 60}}
+
+{"method": "SONG", "class": 5, "accuracy": 0.8746832976028065, "time": 369.645831823349, "hyperparam": {"n_max_epoch": 100, "a": 0.8, "b": 0.1, "theta_g": 60}}
+
+{"method": "SONG", "class": 5, "accuracy": 0.9074254531280452, "time": 368.0128285884857, "hyperparam": {"n_max_epoch": 100, "a": 0.8, "b": 0.15, "theta_g": 60}}
+
+{"method": "SONG", "class": 5, "accuracy": 0.9247709998051062, "time": 367.9159390926361, "hyperparam": {"n_max_epoch": 100, "a": 0.8, "b": 0.2, "theta_g": 60}}
+
+{"method": "SONG", "class": 5, "accuracy": 0.9321769635548626, "time": 372.4981575012207, "hyperparam": {"n_max_epoch": 100, "a": 0.8, "b": 0.25, "theta_g": 60}}
+
+{"method": "SONG", "class": 5, "accuracy": 0.9540050672383551, "time": 372.53110575675964, "hyperparam": {"n_max_epoch": 100, "a": 0.8, "b": 0.3, "theta_g": 60}}
+
+{"method": "SONG", "class": 5, "accuracy": 0.937828883258624, "time": 372.3723392486572, "hyperparam": {"n_max_epoch": 100, "a": 0.8, "b": 0.35, "theta_g": 60}}
+
+{"method": "SONG", "class": 5, "accuracy": 0.9450399532254921, "time": 369.068972826004, "hyperparam": {"n_max_epoch": 100, "a": 0.8, "b": 0.4, "theta_g": 60}}
+
+{"method": "SONG", "class": 5, "accuracy": 0.9278893003313194, "time": 369.10317873954773, "hyperparam": {"n_max_epoch": 100, "a": 0.8, "b": 0.45, "theta_g": 60}}
+
+{"method": "SONG", "class": 5, "accuracy": 0.9368544143441824, "time": 372.566109418869, "hyperparam": {"n_max_epoch": 100, "a": 0.8, "b": 0.5, "theta_g": 60}}
+
+{"method": "SONG", "class": 5, "accuracy": 0.9351003702981875, "time": 371.7641112804413, "hyperparam": {"n_max_epoch": 100, "a": 0.8, "b": 0.55, "theta_g": 60}}
+
+{"method": "SONG", "class": 5, "accuracy": 0.8889105437536543, "time": 370.9447183609009, "hyperparam": {"n_max_epoch": 100, "a": 0.9, "b": 0.05, "theta_g": 60}}
+
+{"method": "SONG", "class": 5, "accuracy": 0.8898850126680959, "time": 369.89909505844116, "hyperparam": {"n_max_epoch": 100, "a": 0.9, "b": 0.1, "theta_g": 60}}
+
+{"method": "SONG", "class": 5, "accuracy": 0.9245761060222178, "time": 373.12766313552856, "hyperparam": {"n_max_epoch": 100, "a": 0.9, "b": 0.15, "theta_g": 60}}
+
+{"method": "SONG", "class": 5, "accuracy": 0.9356850516468525, "time": 370.93293857574463, "hyperparam": {"n_max_epoch": 100, "a": 0.9, "b": 0.2, "theta_g": 60}}
+
+{"method": "SONG", "class": 5, "accuracy": 0.9508867667121419, "time": 366.47323346138, "hyperparam": {"n_max_epoch": 100, "a": 0.9, "b": 0.25, "theta_g": 60}}
+
+{"method": "SONG", "class": 5, "accuracy": 0.9514714480608069, "time": 367.66439962387085, "hyperparam": {"n_max_epoch": 100, "a": 0.9, "b": 0.3, "theta_g": 60}}
+
+{"method": "SONG", "class": 5, "accuracy": 0.9446501656597155, "time": 372.38925981521606, "hyperparam": {"n_max_epoch": 100, "a": 0.9, "b": 0.35, "theta_g": 60}}
+
+{"method": "SONG", "class": 5, "accuracy": 0.9409471837848372, "time": 367.37254667282104, "hyperparam": {"n_max_epoch": 100, "a": 0.9, "b": 0.4, "theta_g": 60}}
+
+{"method": "SONG", "class": 5, "accuracy": 0.9409471837848372, "time": 366.9903881549835, "hyperparam": {"n_max_epoch": 100, "a": 0.9, "b": 0.45, "theta_g": 60}}
+
+{"method": "SONG", "class": 5, "accuracy": 0.9428961216137205, "time": 364.59807777404785, "hyperparam": {"n_max_epoch": 100, "a": 0.9, "b": 0.5, "theta_g": 60}}
+
+{"method": "SONG", "class": 5, "accuracy": 0.9259403625024362, "time": 367.1352822780609, "hyperparam": {"n_max_epoch": 100, "a": 0.9, "b": 0.55, "theta_g": 60}}
+
+{"method": "SONG", "class": 5, "accuracy": 0.8366790099395829, "time": 369.6407332420349, "hyperparam": {"n_max_epoch": 100, "a": 1.0, "b": 0.05, "theta_g": 60}}
+
+{"method": "SONG", "class": 5, "accuracy": 0.897680763983629, "time": 368.23958253860474, "hyperparam": {"n_max_epoch": 100, "a": 1.0, "b": 0.1, "theta_g": 60}}
+
+{"method": "SONG", "class": 5, "accuracy": 0.8924186318456441, "time": 372.42705249786377, "hyperparam": {"n_max_epoch": 100, "a": 1.0, "b": 0.15, "theta_g": 60}}
+
+{"method": "SONG", "class": 5, "accuracy": 0.9382186708244007, "time": 368.20032024383545, "hyperparam": {"n_max_epoch": 100, "a": 1.0, "b": 0.2, "theta_g": 60}}
+
+{"method": "SONG", "class": 5, "accuracy": 0.9491327226661469, "time": 370.73042011260986, "hyperparam": {"n_max_epoch": 100, "a": 1.0, "b": 0.25, "theta_g": 60}}
+
+{"method": "SONG", "class": 5, "accuracy": 0.9522510231923602, "time": 372.8541042804718, "hyperparam": {"n_max_epoch": 100, "a": 1.0, "b": 0.3, "theta_g": 60}}
+
+{"method": "SONG", "class": 5, "accuracy": 0.9516663418436951, "time": 371.32220578193665, "hyperparam": {"n_max_epoch": 100, "a": 1.0, "b": 0.35, "theta_g": 60}}
+
+{"method": "SONG", "class": 5, "accuracy": 0.9454297407912687, "time": 368.59204030036926, "hyperparam": {"n_max_epoch": 100, "a": 1.0, "b": 0.4, "theta_g": 60}}
+
+{"method": "SONG", "class": 5, "accuracy": 0.8900799064509842, "time": 369.64400911331177, "hyperparam": {"n_max_epoch": 100, "a": 1.0, "b": 0.45, "theta_g": 60}}
+
+{"method": "SONG", "class": 5, "accuracy": 0.9212629117131164, "time": 371.3183174133301, "hyperparam": {"n_max_epoch": 100, "a": 1.0, "b": 0.5, "theta_g": 60}}
+
+{"method": "SONG", "class": 5, "accuracy": 0.9269148314168778, "time": 370.30497646331787, "hyperparam": {"n_max_epoch": 100, "a": 1.0, "b": 0.55, "theta_g": 60}}
+
+{"method": "SONG", "class": 5, "accuracy": 0.825959851880725, "time": 369.2158308029175, "hyperparam": {"n_max_epoch": 100, "a": 0.05, "b": 0.05, "theta_g": 80}}
+
+{"method": "SONG", "class": 5, "accuracy": 0.8394075229000195, "time": 361.39939737319946, "hyperparam": {"n_max_epoch": 100, "a": 0.05, "b": 0.1, "theta_g": 80}}
+
+{"method": "SONG", "class": 5, "accuracy": 0.8316117715844864, "time": 361.8797085285187, "hyperparam": {"n_max_epoch": 100, "a": 0.05, "b": 0.15, "theta_g": 80}}
+
+{"method": "SONG", "class": 5, "accuracy": 0.8676671214188267, "time": 363.5286157131195, "hyperparam": {"n_max_epoch": 100, "a": 0.05, "b": 0.2, "theta_g": 80}}
+
