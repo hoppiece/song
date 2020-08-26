@@ -186,7 +186,6 @@ class SONG:
         self.grow_rate = np.zeros(self.n_coding_vector)
         self.alpha = self.init_alpha
 
-        old_connecteds = set()
         t_max = self.n_max_epoch * self.n_in_data_num
         for ite, idx in enumerate(np.random.randint(0, self.n_in_data_num, t_max)):
             if ite % self.n_in_data_num == 0:
@@ -202,9 +201,6 @@ class SONG:
             self._update_neighbors(x)
             i_1 = self.neighbor_idxs[0]
             self._edge_curation()
-            if old_connecteds == self.topology[i_1].keys():
-                pass
-            old_connecteds = self.topology[i_1].keys()
             self._organize_coding_vector(x)
             self._update_embeddings()
             self.grow_rate[i_1] += np.linalg.norm(x - self.coding_vector[i_1])
