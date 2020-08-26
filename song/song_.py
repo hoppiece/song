@@ -40,8 +40,8 @@ class SONG:
         n_neighbors=3,  # k: number of neighbors to search
         alpha=1.0,  # learning rate
         negative_sample_rate=1,  # r: not mentioned in the paper
-        a=1.577,
-        b=0.895,  # hyper parameter, not mentioned in the paper
+        a=1.0,
+        b=0.25,  # hyper parameter, not mentioned in the paper
         theta_g=100,  # not mentioned in the paper.
         min_edge_weight=0.1,  # not mentioned in the paper
         edge_decay_rate=0.99,  # epsilon
@@ -186,43 +186,32 @@ class SONG:
         self.grow_rate = np.zeros(self.n_coding_vector)
         self.alpha = self.init_alpha
 
-        is_execute = False
-        epoch = 0
-        while not is_execute:
-            print(
-                "epoch: {} n_codev: {} m_grow_rate: {}".format(
-                    epoch, self.n_coding_vector, np.mean(self.grow_rate)
+        old_connecteds = set()
+        t_max = self.n_max_epoch * self.n_in_data_num
+        for ite, idx in enumerate(np.random.randint(0, self.n_in_data_num, t_max)):
+            if ite % self.n_in_data_num == 0:
+                print(
+                    "epoch: {} n_codev: {} m_grow_rate: {}".format(
+                        ite // self.n_in_data_num,
+                        self.n_coding_vector,
+                        np.mean(self.grow_rate),
+                    )
                 )
-            )
-            is_execute = True
-            for idx in np.random.permutation(self.n_in_data_num):
-                self.idx = idx
-                x = self.X[idx]
-                self._update_neighbors(x)
-                i_1 = self.neighbor_idxs[0]
-                self._edge_curation()
-                if self.old_topology is not None:
-                    if i_1 in self.old_topology:
-                        old_connecteds = set(self.old_topology[i_1].keys())
-                    else:
-                        old_connecteds = None
-                else:
-                    old_connecteds = None
-                connecteds = set(self.topology[i_1].keys())
-                if old_connecteds != connecteds:
-                    is_execute = False
+            self.idx = idx
+            x = self.X[idx]
+            self._update_neighbors(x)
+            i_1 = self.neighbor_idxs[0]
+            self._edge_curation()
+            if old_connecteds == self.topology[i_1].keys():
+                pass
+            old_connecteds = self.topology[i_1].keys()
+            self._organize_coding_vector(x)
+            self._update_embeddings()
+            self.grow_rate[i_1] += np.linalg.norm(x - self.coding_vector[i_1])
+            if self.grow_rate[i_1] > self.theta_g:
+                self._refine_topology(x)
 
-                self._organize_coding_vector(x)
-                self._update_embeddings()
-                self.grow_rate[i_1] += np.linalg.norm(x - self.coding_vector[i_1])
-                if self.grow_rate[i_1] > self.theta_g:
-                    self._refine_topology(x)
-
-            self.old_topology = copy.deepcopy(self.topology)
-            self.alpha = self.init_alpha * (1 - epoch / self.n_max_epoch)
-            epoch += 1
-            if epoch >= self.n_max_epoch:
-                is_execute = True
+            self.alpha = self.init_alpha * (1 - ite / t_max)
 
         self.topology.check_topology()
 
