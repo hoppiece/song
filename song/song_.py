@@ -31,6 +31,16 @@ class Topology(dict):
                     )
                     raise ValueError(msg)
 
+    def get_degree(self):
+        ret = []
+        for key, adjacency in self.items():
+            ret.append(len(adjacency))
+
+        return ret
+
+    def get_max_degree(self):
+        return max(self.get_degree())
+
 
 class SONG:
     def __init__(
