@@ -59,11 +59,6 @@ class SONG:
         self.grow_rate = np.zeros(n_init_coding_vector)
 
         for epoch in range(self.n_max_epoch):
-            print("---------", epoch, "epoch --------")
-            print("coding vector\n", self.coding_vector)
-            print("top indices\n", self.topo_weight)
-            print("topo w\n", self.topo_weight)
-            print("emb\n", self.embeddings)
             (
                 self.coding_vector,
                 self.topo_indices,
@@ -158,12 +153,11 @@ def curate_edge(
     In this setting, each variable is as below.
         connect_to_i1 = [[False, False], [False, True], [False, False], [True, False]]
         connect_indices = [False, True, False, True]
-        new_topo_weight = [0,8, 0.54, 0.9, 0.45]
+        topo_weight = [0,8, 0.54, 0.9, 0.45]
     """
-    new_topo_weight = topo_weight
     connect_to_i1 = topo_indices == i_1  # boolean index
     connect_indices = np.sum(connect_to_i1, axis=1) == 1
-    new_topo_weight[connect_indices] = topo_weight[connect_indices] * edge_decay_rate
+    topo_weight[connect_indices] *= edge_decay_rate
 
     # Preprocess of renew edges
     """
@@ -184,17 +178,24 @@ def curate_edge(
     Therefore, we find the [0, 2] or [1, 2] edge
     """
     k = len(knn_indices)
-    connect_to_j = [np.sum(topo_indices == j, axis=1) for j in knn_indices[:1]]
+    connect_to_j = [np.sum(topo_indices == j, axis=1) for j in knn_indices[1:]]
     mask_indices = (connect_indices * k + np.sum(connect_to_j, axis=0)) > k
-    new_topo_weight[mask_indices] = 0
+    topo_weight[mask_indices] = 0
 
     # Prune edges
     """
     Edge which weight is lower than min_edge_weight will be deleted.
+    TODO This process costs time because of `np.delete`. We'll replace it.
     """
-    remain_indices = new_topo_weight >= min_edge_weight
-    new_topo_indices = np.take(topo_indices, remain_indices, axis=0)
-    new_topo_weight = new_topo_weight[remain_indices]
+
+    del_indices = np.where(topo_weight < min_edge_weight)[0]
+    topo_indices = np.delete(topo_indices, del_indices, axis=0)
+    topo_weight = np.delete(topo_weight, del_indices, axis=0)
+    """
+    del_indices = topo_weight < min_edge_weight
+    topo_indices = np.take(topo_indices, remain_indices, axis=0)
+    topo_weight = topo_weight[remain_indices]
+    """
 
     # Renew edges
     """
@@ -205,10 +206,10 @@ def curate_edge(
     """
     addition_indices = np.array([[i_1, j] for j in knn_indices[1:]], dtype=np.int64)
     addition_weight = np.ones(len(knn_indices[1:]), dtype=np.float64)
-    new_topo_indices = np.concatenate([new_topo_indices, addition_indices])
-    new_topo_weight = np.concatenate([new_topo_weight, addition_weight])
+    topo_indices = np.concatenate([topo_indices, addition_indices])
+    topo_weight = np.concatenate([topo_weight, addition_weight])
 
-    return new_topo_indices, new_topo_weight
+    return topo_indices, topo_weight
 
 
 def organize_codign_vector(
@@ -338,10 +339,8 @@ def single_batch(
 ):
     n_in_data_num = X.shape[0]
     for idx in np.random.permutation(n_in_data_num):
-        print(idx, "idx")
         x = X[idx]
         knn_indices = nearest_neighbors(x, coding_vector, n_neighbors)
-        print("knn\n", knn_indices)
         i_1 = knn_indices[0]
         topo_indices, topo_weight = curate_edge(
             topo_indices, topo_weight, knn_indices, edge_decay_rate, min_edge_weight
@@ -361,13 +360,13 @@ def single_batch(
             negative_sample_rate,
         )
         grow_rate[i_1] += np.linalg.norm(x - coding_vector[i_1])
+
         if grow_rate[i_1] > theta_g:
             (
                 coding_vector,
-                topo_weight,
+                topo_indices,
                 topo_weight,
                 embeddings,
-                knn_indices,
                 grow_rate,
             ) = refine_topology(
                 coding_vector,
