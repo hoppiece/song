@@ -311,8 +311,9 @@ def refine_topology(
 
     addition_topo_indices = np.array([[j, n_coding_vector] for j in knn_indices])
     addition_topo_weight = np.ones(len(knn_indices), dtype=np.float64)
+
     topo_indices = np.vstack([topo_indices, addition_topo_indices])
-    topo_weight = np.vstack([topo_weight, addition_topo_weight])
+    topo_weight = np.concatenate([topo_weight, addition_topo_weight])
 
     grow_rate = np.append(grow_rate, 0.0)
     grow_rate[i_1] = 0.0
