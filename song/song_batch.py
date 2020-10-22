@@ -59,6 +59,11 @@ class SONG:
         self.grow_rate = np.zeros(n_init_coding_vector)
 
         for epoch in range(self.n_max_epoch):
+            print(
+                "epoch: {} n_codev: {} m_grow_rate: {}".format(
+                    epoch, len(self.coding_vector), np.mean(self.grow_rate)
+                )
+            )
             (
                 self.coding_vector,
                 self.topo_indices,
@@ -83,6 +88,21 @@ class SONG:
                 self.edge_decay_rate,
             )
             self.alpha = self.init_alpha * (1 - epoch / self.n_max_epoch)
+
+        if self.X_label is not None:
+            self._set_embedding_label()
+            print("finished")
+
+    def _set_embedding_label(self) -> None:
+        """
+        When X has label data, it held in `self.embedding_label`.
+        """
+        self.raw_embeddings = np.zeros((self.X.shape[0], self.embeddings.shape[1]))
+        self.embedding_label = np.zeros(len(self.embeddings))
+        for i, x in enumerate(self.X):
+            i_1 = nearest_neighbors(x, self.coding_vector, self.n_neighbors)[0]
+            self.raw_embeddings[i] = self.embeddings[i_1]
+            self.embedding_label[i_1] = self.X_label[i]
 
 
 def nearest_neighbors(point: np.array, data: np.array, n_neighbors: int) -> np.array:
