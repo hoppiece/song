@@ -1,6 +1,8 @@
 from typing import Tuple
 
 import numpy as np
+import numba
+from numba import njit, jit
 
 
 class SONG:
@@ -124,7 +126,7 @@ def nearest_neighbors(point: np.array, data: np.array, n_neighbors: int) -> np.a
     knn_indices: array of int
         The indices on the ``n_neighbors`` closest points in the dataset.
     """
-    dists = np.linalg.norm(data - np.full(data.shape, point), axis=1)
+    dists = np.linalg.norm(data - point, axis=1)
     if data.shape[0] <= n_neighbors:
         knn_indices = np.argsort(dists)
     else:
@@ -134,6 +136,67 @@ def nearest_neighbors(point: np.array, data: np.array, n_neighbors: int) -> np.a
         knn_indices = unsorted_min_indices[sorted_min_indices]
 
     return knn_indices
+
+
+def bnearest_neighbors(points: np.array, data: np.array, n_neighbors: int) -> np.array:
+    """ TODO There should be a more efficient way
+    """
+    pass
+
+
+def _decay_edge(topo_indices, topo_weight, i_1, edge_decay_rate):
+    """
+    In this step, edges which connect to i_1 are decayed.
+
+    For example, suppose that
+        topo_indices = [[0, 1], [0, 2], [1, 3], [2, 3]]
+        topo_weight = [0.8, 0.6, 0.9, 0.5]
+        i_1 = 2
+        edge_decay_rate = 0.9
+
+    In this setting, each variable is as below.
+        connect_to_i1 = [[False, False], [False, True], [False, False], [True, False]]
+        connect_indices = [False, True, False, True]
+        topo_weight = [0,8, 0.54, 0.9, 0.45]
+    """
+    connect_to_i1 = topo_indices == i_1  # boolean index
+    connect_indices = np.sum(connect_to_i1, axis=1) == 1
+    topo_weight[connect_indices] *= edge_decay_rate
+    return topo_weight, connect_indices
+
+
+def _prune_edge(topo_indices, topo_weight, min_edge_weight):
+    # Prune edges
+    """
+    Edge which weight is lower than min_edge_weight will be deleted.
+    TODO This process costs time because of `np.delete`. We'll replace it.
+    """
+
+    del_indices = np.where(topo_weight < min_edge_weight)[0]
+    topo_indices = np.delete(topo_indices, del_indices, axis=0)
+    topo_weight = np.delete(topo_weight, del_indices, axis=0)
+    return topo_indices, topo_weight
+
+
+def _mute_edge(topo_weight, min_edge_weight):
+    topo_weight = np.where(topo_weight < min_edge_weight, topo_weight, 0.0)
+    return topo_weight
+
+
+def _renew_edge(topo_indices, topo_weight, knn_indices):
+    # Renew edges
+    """
+    We add the edges [i_1, j_1],...,[i_1, j_k], and set their weight 1.0.
+    In the above example,
+        addition_indices = [[0, 2], [1, 2]]
+        addtion_weight = [1.0, 1.0]
+    """
+    i_1 = knn_indices[0]
+    addition_indices = np.array([[i_1, j] for j in knn_indices[1:]], dtype=np.int64)
+    addition_weight = np.ones(len(knn_indices[1:]), dtype=np.float64)
+    topo_indices = np.concatenate([topo_indices, addition_indices])
+    topo_weight = np.concatenate([topo_weight, addition_weight])
+    return topo_indices, topo_weight
 
 
 def curate_edge(
@@ -159,25 +222,10 @@ def curate_edge(
     new_topo_weight
     """
     i_1 = knn_indices[0]
-
-    # Decay edges
-    """
-    In this step, edges which connect to i_1 are decayed.
-
-    For example, suppose that
-        topo_indices = [[0, 1], [0, 2], [1, 3], [2, 3]]
-        topo_weight = [0.8, 0.6, 0.9, 0.5]
-        i_1 = 2
-        edge_decay_rate = 0.9
-
-    In this setting, each variable is as below.
-        connect_to_i1 = [[False, False], [False, True], [False, False], [True, False]]
-        connect_indices = [False, True, False, True]
-        topo_weight = [0,8, 0.54, 0.9, 0.45]
-    """
-    connect_to_i1 = topo_indices == i_1  # boolean index
-    connect_indices = np.sum(connect_to_i1, axis=1) == 1
-    topo_weight[connect_indices] *= edge_decay_rate
+    # Decay
+    topo_weight, connect_indices = _decay_edge(
+        topo_indices, topo_weight, i_1, edge_decay_rate
+    )
 
     # Preprocess of renew edges
     """
@@ -202,36 +250,17 @@ def curate_edge(
     mask_indices = (connect_indices * k + np.sum(connect_to_j, axis=0)) > k
     topo_weight[mask_indices] = 0
 
-    # Prune edges
-    """
-    Edge which weight is lower than min_edge_weight will be deleted.
-    TODO This process costs time because of `np.delete`. We'll replace it.
-    """
+    # Prune
+    topo_indices, topo_weight = _prune_edge(topo_indices, topo_weight, min_edge_weight)
+    # topo_weight = _mute_edge(topo_weight, min_edge_weight)
 
-    del_indices = np.where(topo_weight < min_edge_weight)[0]
-    topo_indices = np.delete(topo_indices, del_indices, axis=0)
-    topo_weight = np.delete(topo_weight, del_indices, axis=0)
-    """
-    del_indices = topo_weight < min_edge_weight
-    topo_indices = np.take(topo_indices, remain_indices, axis=0)
-    topo_weight = topo_weight[remain_indices]
-    """
-
-    # Renew edges
-    """
-    We add the edges [i_1, j_1],...,[i_1, j_k], and set their weight 1.0.
-    In the above example,
-        addition_indices = [[0, 2], [1, 2]]
-        addtion_weight = [1.0, 1.0]
-    """
-    addition_indices = np.array([[i_1, j] for j in knn_indices[1:]], dtype=np.int64)
-    addition_weight = np.ones(len(knn_indices[1:]), dtype=np.float64)
-    topo_indices = np.concatenate([topo_indices, addition_indices])
-    topo_weight = np.concatenate([topo_weight, addition_weight])
+    # Renew
+    topo_indices, topo_weight = _renew_edge(topo_indices, topo_weight, knn_indices)
 
     return topo_indices, topo_weight
 
 
+@njit
 def organize_codign_vector(
     coding_vector: np.array,
     topo_indices: np.array,
@@ -261,18 +290,19 @@ def organize_codign_vector(
     i_1 = knn_indices[0]
     i_k = knn_indices
     w = np.linalg.norm(x - coding_vector[i_k]) ** 2
-    new_coding_vector = coding_vector
     for j in connect_node_indices(topo_indices, i_1):
         dire = x - coding_vector[j]
-        new_coding_vector[j] += alpha * np.exp(-np.linalg.norm(dire) / w) * dire
+        coding_vector[j] += alpha * np.exp(-np.linalg.norm(dire) / w) * dire
 
-    return new_coding_vector
+    return coding_vector
 
 
+@njit
 def connect_node_indices(topo_indices: np.array, i: int) -> np.array:
     return np.sum(topo_indices[np.where(topo_indices == i)[0]], axis=1) - i
 
 
+@njit
 def update_embeddings(
     coding_vector: np.array,
     topo_indices: np.array,
@@ -287,16 +317,16 @@ def update_embeddings(
     i_1 = knn_indices[0]
     new_embeddings = embeddings
 
-    for c, idx in enumerate(np.where(topo_indices == i_1)[0]):
+    connect = np.where(topo_indices == i_1)[0]
+    for idx in connect:
         j = np.sum(topo_indices[idx]) - i_1
         e = topo_weight[idx]
         dire = embeddings[i_1] - embeddings[j]
         dist = np.linalg.norm(dire)
         nabla = (2 * a * b * e * dist ** (2 * b - 2)) / (1 + dist ** (2 * b))
         new_embeddings[j] += alpha * nabla * dire
-        count = c
 
-    n_negative_sample = int((count + 1) * negative_sample_rate)
+    n_negative_sample = int((len(connect) + 1) * negative_sample_rate)
     for j in np.random.randint(0, len(coding_vector), n_negative_sample):
         if j == i_1:
             continue
@@ -399,7 +429,41 @@ def single_batch(
                 x,
             )
 
+    topo_indices, topo_weight = _prune_edge(topo_indices, topo_weight, min_edge_weight)
+
     return coding_vector, topo_indices, topo_weight, embeddings, grow_rate
+
+
+def multi_batch(
+    X,
+    coding_vector,
+    topo_indices,
+    topo_weight,
+    embeddings,
+    grow_rate,
+    alpha,
+    n_out_dim,
+    n_neighbors,
+    negative_sample_rate,
+    a,
+    b,
+    theta_g,
+    min_edge_weight,
+    edge_decay_rate,
+    n_batch_size,
+    iters_num=1000,
+):
+    n_in_data_num = X.shape[0]
+    for i in range(iters_num):
+        batch_mask = np.random.choice(n_in_data_num, n_batch_size)
+        x_batch = X[batch_mask]
+        bknn_indices = [
+            nearest_neighbors(x_batch[b], coding_vector, n_neighbors) for b in x_batch
+        ]
+        for knn_indices in bknn_indices:
+            topo_indices, topo_weight = curate_edge(
+                topo_indices, topo_weight, knn_indices, edge_decay_rate, min_edge_weight
+            )
 
 
 if __name__ == "__main__":
