@@ -15,7 +15,7 @@ import song_
 import song_batch
 
 DATA_PATH = "../data"
-MAX_DATA_NUM = 10000
+MAX_DATA_NUM = 1000
 
 
 def loader():
@@ -88,7 +88,7 @@ def main():
         data = prep_model.fit_transform(data)
 
     model = song_batch.SONG(
-        n_max_epoch=100, a=1.0, b=0.25, theta_g=40, edge_decay_rate=0.9
+        n_max_epoch=100, a=1.0, b=0.1, theta_g=40, edge_decay_rate=0.9, batch_size=10
     )
     start = time.time()
     model.fit(data, labels)

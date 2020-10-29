@@ -18,6 +18,7 @@ class SONG:
         theta_g=100,  # not mentioned in the paper.
         min_edge_weight=0.3,  # not mentioned in the paper
         edge_decay_rate=0.9,  # epsilon
+        batch_size=None,
     ) -> None:
 
         self.n_max_epoch = n_max_epoch
@@ -30,6 +31,7 @@ class SONG:
         self.theta_g = theta_g
         self.min_edge_weight = min_edge_weight
         self.edge_decay_rate = edge_decay_rate
+        self.batch_size = batch_size
 
         self.alpha = alpha
 
@@ -60,37 +62,69 @@ class SONG:
         self.embeddings = np.random.randn(n_init_coding_vector, self.n_out_dim)
         self.grow_rate = np.zeros(n_init_coding_vector)
 
-        for epoch in range(self.n_max_epoch):
-            print(
-                "epoch: {} n_codev: {} m_grow_rate: {}".format(
-                    epoch, len(self.coding_vector), np.mean(self.grow_rate)
+        if self.batch_size is None:
+            for epoch in range(self.n_max_epoch):
+                print(
+                    "epoch: {} n_codev: {} m_grow_rate: {}".format(
+                        epoch, len(self.coding_vector), np.mean(self.grow_rate)
+                    )
                 )
-            )
-            (
-                self.coding_vector,
-                self.topo_indices,
-                self.topo_weight,
-                self.embeddings,
-                self.grow_rate,
-            ) = single_batch(
-                self.X,
-                self.coding_vector,
-                self.topo_indices,
-                self.topo_weight,
-                self.embeddings,
-                self.grow_rate,
-                self.alpha,
-                self.n_out_dim,
-                self.n_neighbors,
-                self.negative_sample_rate,
-                self.a,
-                self.b,
-                self.theta_g,
-                self.min_edge_weight,
-                self.edge_decay_rate,
-            )
-            self.alpha = self.init_alpha * (1 - epoch / self.n_max_epoch)
-
+                (
+                    self.coding_vector,
+                    self.topo_indices,
+                    self.topo_weight,
+                    self.embeddings,
+                    self.grow_rate,
+                ) = single_batch(
+                    self.X,
+                    self.coding_vector,
+                    self.topo_indices,
+                    self.topo_weight,
+                    self.embeddings,
+                    self.grow_rate,
+                    self.alpha,
+                    self.n_out_dim,
+                    self.n_neighbors,
+                    self.negative_sample_rate,
+                    self.a,
+                    self.b,
+                    self.theta_g,
+                    self.min_edge_weight,
+                    self.edge_decay_rate,
+                )
+                self.alpha = self.init_alpha * (1 - epoch / self.n_max_epoch)
+        else:
+            for epoch in range(self.n_max_epoch):
+                print(
+                    "epoch: {} n_codev: {} m_grow_rate: {}".format(
+                        epoch, len(self.coding_vector), np.mean(self.grow_rate)
+                    )
+                )
+                (
+                    self.coding_vector,
+                    self.topo_indices,
+                    self.topo_weight,
+                    self.embeddings,
+                    self.grow_rate,
+                ) = multi_batch(
+                    self.X,
+                    self.coding_vector,
+                    self.topo_indices,
+                    self.topo_weight,
+                    self.embeddings,
+                    self.grow_rate,
+                    self.alpha,
+                    self.n_out_dim,
+                    self.n_neighbors,
+                    self.negative_sample_rate,
+                    self.a,
+                    self.b,
+                    self.theta_g,
+                    self.min_edge_weight,
+                    self.edge_decay_rate,
+                    self.batch_size,
+                )
+                self.alpha = self.init_alpha * (1 - epoch / self.n_max_epoch)
         if self.X_label is not None:
             self._set_embedding_label()
             print("finished")
@@ -298,6 +332,18 @@ def organize_codign_vector(
 
 
 @njit
+def borganize_coding_vector(coding_vector, topo_indices, alpha, x_batch, bknn_indices):
+    for i in range(len(bknn_indices)):
+        x = x_batch[i]
+        knn_indices = bknn_indices[i]
+        coding_vector = organize_codign_vector(
+            coding_vector, topo_indices, alpha, x, knn_indices
+        )
+
+    return coding_vector
+
+
+@njit
 def connect_node_indices(topo_indices: np.array, i: int) -> np.array:
     return np.sum(topo_indices[np.where(topo_indices == i)[0]], axis=1) - i
 
@@ -337,6 +383,34 @@ def update_embeddings(
         new_embeddings[j] -= alpha * nabla * dire
 
     return new_embeddings
+
+
+@njit
+def bupdate_embeddings(
+    coding_vector,
+    topo_indices,
+    topo_weight,
+    embeddings,
+    bknn_indices,
+    alpha,
+    a,
+    b,
+    negative_sample_rate,
+):
+    for i in range(len(bknn_indices)):
+        knn_indices = bknn_indices[i]
+        embeddings = update_embeddings(
+            coding_vector,
+            topo_indices,
+            topo_weight,
+            embeddings,
+            knn_indices,
+            alpha,
+            a,
+            b,
+            negative_sample_rate,
+        )
+    return embeddings
 
 
 def refine_topology(
@@ -429,8 +503,6 @@ def single_batch(
                 x,
             )
 
-    topo_indices, topo_weight = _prune_edge(topo_indices, topo_weight, min_edge_weight)
-
     return coding_vector, topo_indices, topo_weight, embeddings, grow_rate
 
 
@@ -451,19 +523,55 @@ def multi_batch(
     min_edge_weight,
     edge_decay_rate,
     n_batch_size,
-    iters_num=1000,
 ):
     n_in_data_num = X.shape[0]
+    iters_num = X.shape[0]
     for i in range(iters_num):
         batch_mask = np.random.choice(n_in_data_num, n_batch_size)
         x_batch = X[batch_mask]
-        bknn_indices = [
-            nearest_neighbors(x_batch[b], coding_vector, n_neighbors) for b in x_batch
-        ]
+        bknn_indices = np.array(
+            [nearest_neighbors(x, coding_vector, n_neighbors) for x in x_batch]
+        )
+
         for knn_indices in bknn_indices:
             topo_indices, topo_weight = curate_edge(
                 topo_indices, topo_weight, knn_indices, edge_decay_rate, min_edge_weight
             )
+        coding_vector = borganize_coding_vector(
+            coding_vector, topo_indices, alpha, x_batch, bknn_indices
+        )
+        embeddings = bupdate_embeddings(
+            coding_vector,
+            topo_indices,
+            topo_weight,
+            embeddings,
+            bknn_indices,
+            alpha,
+            a,
+            b,
+            negative_sample_rate,
+        )
+        for b, knn_indices in enumerate(bknn_indices):
+            i_1 = knn_indices[0]
+            x = x_batch[b]
+            grow_rate[i_1] += np.linalg.norm(x - coding_vector[i_1])
+            if grow_rate[i_1] > theta_g:
+                (
+                    coding_vector,
+                    topo_indices,
+                    topo_weight,
+                    embeddings,
+                    grow_rate,
+                ) = refine_topology(
+                    coding_vector,
+                    topo_indices,
+                    topo_weight,
+                    embeddings,
+                    knn_indices,
+                    grow_rate,
+                    x,
+                )
+    return coding_vector, topo_indices, topo_weight, embeddings, grow_rate
 
 
 if __name__ == "__main__":
@@ -473,6 +581,6 @@ if __name__ == "__main__":
     d = np.random.normal(5, 1, (20, 5))
     X = np.vstack((a, b, c, d))
     print("X\n", X)
-    model = SONG()
+    model = SONG(batch_size=5)
     model.fit(X)
     print(model.embeddings)
