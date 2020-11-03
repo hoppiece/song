@@ -322,11 +322,13 @@ def organize_codign_vector(
         [description]
     """
     i_1 = knn_indices[0]
-    i_k = knn_indices
+    i_k = knn_indices[-1]
     w = np.linalg.norm(x - coding_vector[i_k]) ** 2
-    for j in connect_node_indices(topo_indices, i_1):
-        dire = x - coding_vector[j]
-        coding_vector[j] += alpha * np.exp(-np.linalg.norm(dire) / w) * dire
+    J = connect_node_indices(topo_indices, i_1)
+    dire = x - coding_vector[J]
+    coding_vector[J] += alpha * (
+        np.exp(-np.sum(dire ** 2, axis=1) / w).reshape(-1, 1) * dire
+    )
 
     return coding_vector
 
@@ -581,6 +583,6 @@ if __name__ == "__main__":
     d = np.random.normal(5, 1, (20, 5))
     X = np.vstack((a, b, c, d))
     print("X\n", X)
-    model = SONG(batch_size=5)
+    model = SONG()
     model.fit(X)
     print(model.embeddings)
