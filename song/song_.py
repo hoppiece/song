@@ -102,12 +102,12 @@ class SONG:
 
     def _organize_coding_vector(self, x: np.array) -> None:
         i_1 = self.neighbor_idxs[0]
-        i_k = self.neighbor_idxs
+        i_k = self.neighbor_idxs[-1]
         w = np.linalg.norm(x - self.coding_vector[i_k]) ** 2
         for j in self.topology[i_1].keys():
             dire = x - self.coding_vector[j]
             self.coding_vector[j] += (
-                self.alpha * np.exp(-np.linalg.norm(dire) / w) * dire
+                self.alpha * np.exp(-np.linalg.norm(dire) ** 2 / w) * dire
             )
 
     def _update_embeddings(self) -> None:
