@@ -537,21 +537,42 @@ class SONG:
             if epoch >= self.n_max_epoch:
                 is_execute = True
 
-    def transform(self, x: np.array) -> np.array:
-        """Fit X into an embedded space and return that transformed
-        output.
+    def fit_add(self, X):  # TODO WIP. 学習済みの c.v. と emb. は固定したほうがよさそう?.
+        if self.X is None:
+            raise
+        if self.n_in_dim != X.shape[1]:
+            raise
+        self.X = X
+        self.n_in_data_num = X.shape[0]
+        self.alpha = self.init_alpha
 
-        Parameters
-        ----------
-        x : np.array, shape(n_features,)
+        is_execute = False
+        epoch = 0
+        while not is_execute:
+            for idx in np.random.permutation(self.n_in_data_num):
+                self.idx = idx
+                x = self.X[idx]
+                self._update_neighbors(x)
+                i_1 = self.neighbor_idxs[0]
+                self._edge_curation()
+                self._organize_coding_vector(x)
+                self._update_embeddings()
+                self.grow_rate[i_1] += np.linalg.norm(x - self.coding_vector[i_1])
+                if self.grow_rate[i_1] > self.theta_g:
+                    self._refine_topology(x)
+            self.alpha = self.init_alpha * (1 - epoch / self.n_max_epoch)
+            epoch += 1
+            if epoch >= self.n_max_epoch:
+                is_execute = True
 
-        Returns
-        -------
-        embedding: np.array, shape(n_out_dim, )
-        """
-        self._update_neighbors(x)
-        i_1 = self.neighbor_idxs[0]
-        return self.embeddings[i_1]
+    def set_label(self, X, X_label):
+        self.raw_embeddings = np.zeros((X.shape[0], self.embeddings.shape[1]))
+        self.embedding_label = np.zeros(len(self.embeddings))
+        for i, x in enumerate(X):
+            self._update_neighbors(x)
+            i_1 = self.neighbor_idxs[0]
+            self.raw_embeddings[i] = self.embeddings[i_1]
+            self.embedding_label[i_1] = X_label[i]
 
 
 if __name__ == "__main__":
