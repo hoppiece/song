@@ -6,6 +6,42 @@ import numba
 import sklearn.neighbors
 
 
+@numba.jit
+def _coding_vector_sgd(x, coding_vector, knn_indices, connects, alpha):
+    i_k = knn_indices[-1]
+    w = np.linalg.norm(x - coding_vector[i_k]) ** 2
+    dire = x - coding_vector[connects]
+    coding_vector[connects] += alpha * (
+        np.exp(-np.sum(dire ** 2, axis=1) / w).reshape(-1, 1) * dire
+    )
+
+
+@numba.njit
+def embedding_sgd_attr(embeddings, i_1, connecteds, e_ary, a, b, alpha):
+    dire = embeddings[i_1] - embeddings[connecteds]
+    embeddings[connecteds] += (
+        alpha
+        * dire
+        * (2 * a * b * e_ary * np.sum(dire ** 2, axis=1) ** (b - 1)).reshape(-1, 1)
+        / (1 + np.sum(dire ** 2, axis=1) ** b).reshape(-1, 1)
+    )
+
+
+@numba.njit
+def embedding_sgd_rep(embeddings, i_1, negative_edges, n_negative_sample, a, b, alpha):
+    neg_J = np.random.choice(negative_edges, n_negative_sample)
+    dire = embeddings[i_1] - embeddings[neg_J]
+    embeddings[neg_J] -= (
+        alpha
+        * 2
+        * b
+        * dire
+        / (np.sum(dire ** 2, axis=1) * (1 + np.sum(dire ** 2, axis=1) ** b)).reshape(
+            -1, 1
+        )
+    )
+
+
 class Topology(dict):
     """Graph E implemented in adjacency list.
     The sturucture like this:
@@ -109,6 +145,12 @@ class SONG:
             dist, ids = self.tree.query(x.reshape(1, -1), k=self.n_neighbors)
             self.neighbor_idxs = ids.reshape(-1,)
 
+    def _update_neighbors_bat(self, x_batch: np.array):
+        self.tree = sklearn.neighbors.KDTree(self.coding_vector, leaf_size=1000)
+        self.bknn_ind = self.tree.query(
+            x_batch, k=self.n_neighbors, return_distance=False
+        )
+
     def _edge_curation(self) -> None:
         """Updating the directional edge. Algorithem 2 in the paper.
         In this implementation, the graph always keep symmetric.
@@ -150,6 +192,31 @@ class SONG:
         coding_vector[connects] += alpha * (
             np.exp(-np.sum(dire ** 2, axis=1) / w).reshape(-1, 1) * dire
         )
+
+    def _organize_coding_vector_bat(self, x_bat):
+        # It is difficult to use tensor caluculation because length
+        # of `connects` are different with x.
+        connects = [
+            np.array(list(self.topology[self.bknn_ind[i][0]]))
+            for i in range(self.batch_size)
+        ]
+
+        self._coding_vector_sgd_bat(
+            x_bat,
+            self.coding_vector,
+            self.bknn_ind,
+            connects,
+            self.alpha,
+            self.batch_size,
+        )
+
+    @staticmethod
+    # @numba.njit
+    def _coding_vector_sgd_bat(
+        x_bat, coding_vector, bknn_ind, connects, alpha, batch_size
+    ):
+        for i in range(batch_size):
+            _coding_vector_sgd(x_bat[i], coding_vector, bknn_ind[i], connects[i], alpha)
 
     def _update_embeddings_old(self) -> None:  # not using jit version
         i_1 = self.neighbor_idxs[0]
@@ -243,6 +310,76 @@ class SONG:
             ).reshape(-1, 1)
         )
 
+    def _update_embeddings_bat(self):
+        i_1_bat = self.bknn_ind[:, 0]
+        connecteds_bat = [self.topology[i_1].keys for i_1 in i_1_bat]
+        e_ary_bat = [list(self.topology[i_1].values()) for i_1 in i_1_bat]
+        negative_edges_bat = [
+            np.array(
+                list(set(range(len(self.topology))) - connecteds_bat[count] - {i_1})
+            )
+            for count, i_1 in enumerate(i_1_bat)
+        ]
+        connecteds_bat = [np.array(c) for c in connecteds_bat]
+        min_n_negative_edges = min([len(neb) for neb in negative_edges_bat])
+        n_negative_sample_bat = [
+            int(self.negative_sample_rate * len(con)) for con in connecteds_bat
+        ]
+        max_n_negative_sample = max(n_negative_sample_bat)
+        self.embedding_sgd_attr_bat(
+            self.embeddings,
+            i_1_bat,
+            connecteds_bat,
+            e_ary_bat,
+            self.a,
+            self.b,
+            self.alpha,
+            self.batch_size,
+        )
+
+        if min_n_negative_edges >= max_n_negative_sample:
+            self.embedding_sgd_rep_bat(
+                self.embeddings,
+                i_1_bat,
+                negative_edges_bat,
+                n_negative_sample_bat,
+                self.a,
+                self.b,
+                self.alpha,
+                self.batch_size,
+            )
+
+    @staticmethod
+    def embedding_sgd_attr_bat(
+        embeddings, i_1_bat, connecteds_bat, e_ary_bat, a, b, alpha, batch_size
+    ):
+        for i in range(batch_size):
+            embedding_sgd_attr(
+                embeddings, i_1_bat[i], connecteds_bat[i], e_ary_bat[i], a, b, alpha
+            )
+
+    @staticmethod
+    def embedding_sgd_rep_bat(
+        embeddings,
+        i_1_bat,
+        negative_edges_bat,
+        n_negative_sample_bat,
+        a,
+        b,
+        alpha,
+        batch_size,
+    ):
+        for i in range(batch_size):
+            embedding_sgd_rep(
+                embeddings,
+                i_1_bat[i],
+                negative_edges_bat[i],
+                n_negative_sample_bat[i],
+                a,
+                b,
+                alpha,
+            )
+
     def _refine_topology(self, x) -> None:
         """append the element in C, E, Y, G
         """
@@ -275,7 +412,7 @@ class SONG:
             self.raw_embeddings[i] = self.embeddings[i_1]
             self.embedding_label[i_1] = self.X_label[i]
 
-    def fit(self, X: np.array, X_label=None) -> None:
+    def fit(self, X: np.array, X_label=None, batch_size=1) -> None:
         """Fit X in t an embedded space.
 
             Parameters
@@ -285,6 +422,37 @@ class SONG:
 
         self.X = X
         self.X_label = X_label
+        self.n_in_data_num = X.shape[0]
+        self.n_in_dim = X.shape[1]
+        self.n_coding_vector = self.n_out_dim + 1
+        self.coding_vector = np.random.randn(self.n_coding_vector, self.n_in_dim)
+        self.embeddings = np.random.randn(self.n_coding_vector, self.n_out_dim)
+        self.topology = Topology(self.n_coding_vector)
+        self.grow_rate = np.zeros(self.n_coding_vector)
+        self.alpha = self.init_alpha
+        self.batch_size = batch_size
+
+        if self.theta_g is None:
+            self.theta_g = self.n_in_dim * 1.5
+
+        if self.knn_method is None:
+            if self.n_in_dim > 50:
+                self.knn_method = "balltree"
+            else:
+                self.knn_method = "kdtree"
+
+        if self.batch_size >= 2:
+            self.single_batch(X, 3)
+            self.multi_batch(self.X, self.batch_size)
+        else:
+            self.single_batch(X, self.n_max_epoch)
+
+        if self.X_label is not None:
+            self._set_embedding_label()
+        print("finished")
+
+    def single_batch(self, X, max_epoch):
+        self.X = X
         self.n_in_data_num = X.shape[0]
         self.n_in_dim = X.shape[1]
         self.n_coding_vector = self.n_out_dim + 1
@@ -317,29 +485,14 @@ class SONG:
                 self._update_neighbors(x)
                 i_1 = self.neighbor_idxs[0]
                 self._edge_curation()
-                """ 
-                if self.old_topology is not None:
-                    if i_1 in self.old_topology:
-                        old_connecteds = set(self.old_topology[i_1].keys())
-                    else:
-                        old_connecteds = None
-                else:
-                    old_connecteds = None
-                connecteds = set(self.topology[i_1].keys())
-                if old_connecteds != connecteds:
-                    is_execute = False
-                """
-
                 self._organize_coding_vector(x)
                 self._update_embeddings()
                 self.grow_rate[i_1] += np.linalg.norm(x - self.coding_vector[i_1])
                 if self.grow_rate[i_1] > self.theta_g:
                     self._refine_topology(x)
-
-            self.old_topology = copy.deepcopy(self.topology)
             self.alpha = self.init_alpha * (1 - epoch / self.n_max_epoch)
             epoch += 1
-            if epoch >= self.n_max_epoch:
+            if epoch >= max_epoch:
                 is_execute = True
 
         self.topology.check_topology()
@@ -347,6 +500,42 @@ class SONG:
         if self.X_label is not None:
             self._set_embedding_label()
         print("finished")
+
+    def multi_batch(self, X, batch_size):
+        is_execute = False
+        epoch = 0
+        while not is_execute:
+            print(
+                "epoch: {} n_codev: {} m_grow_rate: {}".format(
+                    epoch, self.n_coding_vector, np.mean(self.grow_rate)
+                )
+            )
+            for i in range(int(self.n_in_data_num / self.batch_size)):
+                batch_mask = np.random.choice(self.n_in_data_num, self.batch_size)
+                x_bat = X[batch_mask]
+                self._update_neighbors_bat(x_bat)
+                for ind in self.bknn_ind:
+                    self.neighbor_idxs = ind
+                    self._edge_curation()
+
+                self._organize_coding_vector_bat(x_bat)
+
+                for ind in self.bknn_ind:
+                    self.neighbor_idxs = ind
+                    self._update_embeddings()
+
+                # self._update_embeddings_bat()
+
+                for i, x in enumerate(x_bat):
+                    i_1 = self.bknn_ind[i][0]
+                    self.grow_rate[i_1] += np.linalg.norm(x - self.coding_vector[i_1])
+                    if self.grow_rate[i_1] > self.theta_g:
+                        self._refine_topology(x)
+
+            self.alpha = self.init_alpha * (1 - epoch / self.n_max_epoch)
+            epoch += 1
+            if epoch >= self.n_max_epoch:
+                is_execute = True
 
     def transform(self, x: np.array) -> np.array:
         """Fit X into an embedded space and return that transformed
