@@ -58,7 +58,7 @@ class SONG:
         theta_g=None,  # not mentioned in the paper.
         min_edge_weight=0.1,  # not mentioned in the paper
         edge_decay_rate=0.9,  # epsilon
-        knn_method=None,
+        knn_method="brute_force",
     ) -> None:
 
         self.n_max_epoch = n_max_epoch
@@ -151,7 +151,7 @@ class SONG:
             np.exp(-np.sum(dire ** 2, axis=1) / w).reshape(-1, 1) * dire
         )
 
-    def _update_embeddings(self) -> None:
+    def _update_embeddings_old(self) -> None:  # not using jit version
         i_1 = self.neighbor_idxs[0]
         connecteds = self.topology[i_1].keys()
 
@@ -189,6 +189,59 @@ class SONG:
                     * (1 + np.sum(dire ** 2, axis=1) ** self.b)
                 ).reshape(-1, 1)
             )
+
+    def _update_embeddings(self):
+        i_1 = self.neighbor_idxs[0]
+        connecteds = self.topology[i_1].keys()  # a kind of set object
+        e_ary = np.array(list(self.topology[i_1].values()))
+        negative_edges = np.array(
+            list(set(range(len(self.topology))) - connecteds - {i_1})
+        )
+        connecteds = np.array(list(connecteds))
+        n_negative_edges = len(negative_edges)
+        n_negative_sample = int(self.negative_sample_rate * len(connecteds))
+
+        self.embedding_sgd_attr(
+            self.embeddings, i_1, connecteds, e_ary, self.a, self.b, self.alpha
+        )
+        if n_negative_edges > n_negative_sample:
+            self.embedding_sgd_rep(
+                self.embeddings,
+                i_1,
+                negative_edges,
+                n_negative_sample,
+                self.a,
+                self.b,
+                self.alpha,
+            )
+
+    @staticmethod
+    @numba.njit
+    def embedding_sgd_attr(embeddings, i_1, connecteds, e_ary, a, b, alpha):
+        dire = embeddings[i_1] - embeddings[connecteds]
+        embeddings[connecteds] += (
+            alpha
+            * dire
+            * (2 * a * b * e_ary * np.sum(dire ** 2, axis=1) ** (b - 1)).reshape(-1, 1)
+            / (1 + np.sum(dire ** 2, axis=1) ** b).reshape(-1, 1)
+        )
+
+    @staticmethod
+    @numba.njit
+    def embedding_sgd_rep(
+        embeddings, i_1, negative_edges, n_negative_sample, a, b, alpha
+    ):
+        neg_J = np.random.choice(negative_edges, n_negative_sample)
+        dire = embeddings[i_1] - embeddings[neg_J]
+        embeddings[neg_J] -= (
+            alpha
+            * 2
+            * b
+            * dire
+            / (
+                np.sum(dire ** 2, axis=1) * (1 + np.sum(dire ** 2, axis=1) ** b)
+            ).reshape(-1, 1)
+        )
 
     def _refine_topology(self, x) -> None:
         """append the element in C, E, Y, G
