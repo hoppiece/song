@@ -4,6 +4,8 @@ import numpy as np
 import numba
 from numba import njit, jit
 
+from sklearn.neighbors import KDTree
+
 
 class SONG:
     def __init__(
@@ -58,7 +60,8 @@ class SONG:
             ],
             dtype=np.int64,
         )
-        self.topo_weight = np.ones(n_init_coding_vector, dtype=np.float64)
+        # self.topo_weight = np.ones(n_init_coding_vector, dtype=np.float64)
+        self.topo_weight = np.full(n_init_coding_vector, 0.2, dtype=np.float64)
         self.embeddings = np.random.randn(n_init_coding_vector, self.n_out_dim)
         self.grow_rate = np.zeros(n_init_coding_vector)
 
@@ -141,7 +144,7 @@ class SONG:
             self.embedding_label[i_1] = self.X_label[i]
 
 
-def nearest_neighbors(point: np.array, data: np.array, n_neighbors: int) -> np.array:
+def _nearest_neighbors(point: np.array, data: np.array, n_neighbors: int) -> np.array:
     """ Compute the ``n_neighbors`` nearest points for each data point.
         TODO Use a more efficient algorithm, such as by referring
         to the UMAP implementation or using Annoy.
@@ -170,6 +173,12 @@ def nearest_neighbors(point: np.array, data: np.array, n_neighbors: int) -> np.a
         knn_indices = unsorted_min_indices[sorted_min_indices]
 
     return knn_indices
+
+
+def nearest_neighbors(point: np.array, data: np.array, n_neighbors: int):
+    tree = KDTree(data)
+    dist, knn_indices = tree.query(point.reshape(1, -1), k=n_neighbors)
+    return knn_indices.reshape(-1,)
 
 
 def bnearest_neighbors(points: np.array, data: np.array, n_neighbors: int) -> np.array:
@@ -350,7 +359,7 @@ def connect_node_indices(topo_indices: np.array, i: int) -> np.array:
     return np.sum(topo_indices[np.where(topo_indices == i)[0]], axis=1) - i
 
 
-@njit
+# @njit
 def update_embeddings(
     coding_vector: np.array,
     topo_indices: np.array,
@@ -366,6 +375,7 @@ def update_embeddings(
     new_embeddings = embeddings
 
     connect = np.where(topo_indices == i_1)[0]
+
     for idx in connect:
         j = np.sum(topo_indices[idx]) - i_1
         e = topo_weight[idx]
@@ -373,16 +383,26 @@ def update_embeddings(
         dist = np.linalg.norm(dire)
         nabla = (2 * a * b * e * dist ** (2 * b - 2)) / (1 + dist ** (2 * b))
         new_embeddings[j] += alpha * nabla * dire
-
-    n_negative_sample = int((len(connect) + 1) * negative_sample_rate)
-    for j in np.random.randint(0, len(coding_vector), n_negative_sample):
-        if j == i_1:
-            continue
-
-        dire = embeddings[i_1] - embeddings[j]
-        dist = np.linalg.norm(dire)
-        nabla = 2 * b / (dist ** 2 * (1 + dist ** (2 * b)))
-        new_embeddings[j] -= alpha * nabla * dire
+    """
+    J = connect
+    dire = embeddings[i_1] - embeddings[J]
+    embeddings[J] += (
+        alpha
+        * dire
+        * (2 * a * b * topo_weight[J] * np.sum(dire ** 2, axis=1) ** (b - 1))
+        / (1 + np.sum(dire ** 2, axis=1) ** b)
+    )
+    """
+    negative_edges = np.array(
+        list({i for i in range(len(topo_indices))} - set(connect) - {i_1})
+    )
+    n_negative_sample = int(len(connect) * negative_sample_rate)
+    if len(negative_edges) > n_negative_sample:
+        for j in np.random.choice(negative_edges, n_negative_sample):
+            dire = embeddings[i_1] - embeddings[j]
+            dist = np.linalg.norm(dire)
+            nabla = 2 * b / (dist ** 2 * (1 + dist ** (2 * b)))
+            new_embeddings[j] -= alpha * nabla * dire
 
     return new_embeddings
 
