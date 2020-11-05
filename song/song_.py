@@ -161,7 +161,9 @@ class SONG:
                 self.neighbor_idxs = unsorted_min_indices[sorted_min_indices]
         else:
             self.tree = sklearn.neighbors.KDTree(self.coding_vector)
-            dist, ids = self.tree.query(x.reshape(1, -1), k=self.n_neighbors)
+            self.neighbor_idxs = self.tree.query(
+                x.reshape(1, -1), k=self.n_neighbors, return_distance=False
+            ).reshape(-1,)
 
     def _update_neighbors_bat(self, x_batch: np.array):
         self.tree = sklearn.neighbors.KDTree(self.coding_vector, leaf_size=1000)
