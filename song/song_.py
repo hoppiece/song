@@ -119,7 +119,7 @@ class SONG:
 
         self.neighbor_idxs = None
 
-    def _update_neighbors(self, x: np.array) -> None:
+    def __update_neighbors(self, x: np.array) -> None:
         """Update I^(k) TODO this step can be faster, via KD tree. see
         umap implementation.
         """
@@ -144,6 +144,24 @@ class SONG:
             self.tree = sklearn.neighbors.BallTree(self.coding_vector)
             dist, ids = self.tree.query(x.reshape(1, -1), k=self.n_neighbors)
             self.neighbor_idxs = ids.reshape(-1,)
+
+    def _update_neighbors(self, x):
+        if self.coding_vector.shape[0] < 5000:
+            dists = np.linalg.norm(
+                self.coding_vector - np.full(self.coding_vector.shape, x), axis=1,
+            )
+            if self.n_coding_vector <= self.n_neighbors:
+                self.neighbor_idxs = np.argsort(dists)
+            else:
+                unsorted_min_indices = np.argpartition(dists, self.n_neighbors)[
+                    : self.n_neighbors
+                ]
+                min_dists = dists[unsorted_min_indices]
+                sorted_min_indices = np.argsort(min_dists)
+                self.neighbor_idxs = unsorted_min_indices[sorted_min_indices]
+        else:
+            self.tree = sklearn.neighbors.KDTree(self.coding_vector)
+            dist, ids = self.tree.query(x.reshape(1, -1), k=self.n_neighbors)
 
     def _update_neighbors_bat(self, x_batch: np.array):
         self.tree = sklearn.neighbors.KDTree(self.coding_vector, leaf_size=1000)
